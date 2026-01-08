@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POP - Personal Organization Platform</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animated"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">P</div>
+      <div>
+        <div class="logo-text">POP</div>
+        <div class="logo-subtitle">Personal Organization Platform</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="settingsBtn">
+        <span>⚙️</span> Settings
+      </button>
+      <button class="btn btn-secondary btn-sm" id="exportAllBtn">
+        <span>📤</span> Export All
+      </button>
+      <div class="theme-toggle" id="themeToggle" role="button" aria-label="Toggle dark mode" tabindex="0">
+        <div class="toggle-slider"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content - Bento Grid -->
+  <main class="bento-grid" id="mainGrid">
+
+    <!-- 1. Cognitive Offload -->
+    <div class="glass-card bento-item bubble-cognitive" id="bubble-cognitive-offload" data-utility="cognitiveOffload">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">💡</div>
+          <div>
+            <div class="bubble-name">Cognitive Offload</div>
+            <span class="bubble-hotkey">Alt+C</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="cognitiveOffload">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="cognitiveOffload">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="cognitive-offload-content">
+        <!-- Content loaded by JS -->
+      </div>
+      <div class="bubble-footer">
+        <span class="tag tag-actionable">Actionable: <span id="co-actionable-count">0</span></span>
+        <span class="tag tag-reference">Reference: <span id="co-reference-count">0</span></span>
+      </div>
+    </div>
+
+    <!-- 2. Month Cash Flow -->
+    <div class="glass-card bento-item bubble-cashflow" id="bubble-cash-flow" data-utility="cashFlow">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #10b981, #059669);">💰</div>
+          <div>
+            <div class="bubble-name">Month Cash Flow</div>
+            <span class="bubble-hotkey">Alt+M</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="cashFlow">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="cashFlow">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="cash-flow-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 3. Net Worth Logger -->
+    <div class="glass-card bento-item bubble-networth" id="bubble-net-worth" data-utility="netWorth">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">📈</div>
+          <div>
+            <div class="bubble-name">Net Worth Logger</div>
+            <span class="bubble-hotkey">Alt+N</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="netWorth">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="netWorth">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="net-worth-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 4. Stock Watchlist -->
+    <div class="glass-card bento-item span-2 bubble-stocks" id="bubble-stock-watchlist" data-utility="stockWatchlist">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">📊</div>
+          <div>
+            <div class="bubble-name">Stock Watchlist</div>
+            <span class="bubble-hotkey">Alt+S</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="stockWatchlist">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="stockWatchlist">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="stock-watchlist-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 5. Purpose Gatekeeper -->
+    <div class="glass-card bento-item bubble-purpose" id="bubble-purpose-gatekeeper" data-utility="purposeGatekeeper">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">🎯</div>
+          <div>
+            <div class="bubble-name">Purpose Gatekeeper</div>
+            <span class="bubble-hotkey">Alt+G</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="purposeGatekeeper">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="purposeGatekeeper">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="purpose-gatekeeper-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 6. Daily Negotiator -->
+    <div class="glass-card bento-item tall bubble-negotiator" id="bubble-daily-negotiator" data-utility="dailyNegotiator">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);">☀️</div>
+          <div>
+            <div class="bubble-name">Daily Negotiator</div>
+            <span class="bubble-hotkey">Alt+D</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="dailyNegotiator">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="dailyNegotiator">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="daily-negotiator-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 7. Question Primer -->
+    <div class="glass-card bento-item bubble-question" id="bubble-question-primer" data-utility="questionPrimer">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">❓</div>
+          <div>
+            <div class="bubble-name">Question Primer</div>
+            <span class="bubble-hotkey">Alt+Q</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="questionPrimer">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="questionPrimer">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="question-primer-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 8. Flow Thermometer -->
+    <div class="glass-card bento-item bubble-flow" id="bubble-flow-thermometer" data-utility="flowThermometer">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">🌡️</div>
+          <div>
+            <div class="bubble-name">Flow Thermometer</div>
+            <span class="bubble-hotkey">Alt+F</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="flowThermometer">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="flowThermometer">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="flow-thermometer-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 9. Truth Time Logger -->
+    <div class="glass-card bento-item span-2 bubble-truth" id="bubble-truth-logger" data-utility="truthLogger">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #84cc16, #65a30d);">⏱️</div>
+          <div>
+            <div class="bubble-name">Truth Time Logger</div>
+            <span class="bubble-hotkey">Alt+T</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="truthLogger">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="truthLogger">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="truth-logger-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 10. Tab Snoozer -->
+    <div class="glass-card bento-item bubble-snoozer" id="bubble-tab-snoozer" data-utility="tabSnoozer">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">😴</div>
+          <div>
+            <div class="bubble-name">Tab Snoozer</div>
+            <span class="bubble-hotkey">Alt+B</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="tabSnoozer">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="tabSnoozer">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="tab-snoozer-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 11. Mastery Graph -->
+    <div class="glass-card bento-item bubble-mastery" id="bubble-mastery-graph" data-utility="masteryGraph">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #a855f7, #9333ea);">📉</div>
+          <div>
+            <div class="bubble-name">Mastery Graph</div>
+            <span class="bubble-hotkey">Alt+Y</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="masteryGraph">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="masteryGraph">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="mastery-graph-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 12. Digital Cleaner -->
+    <div class="glass-card bento-item bubble-cleaner" id="bubble-digital-cleaner" data-utility="digitalCleaner">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">🧹</div>
+          <div>
+            <div class="bubble-name">Digital Cleaner</div>
+            <span class="bubble-hotkey">Alt+K</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="digitalCleaner">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="digitalCleaner">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="digital-cleaner-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 13. Weekly Review -->
+    <div class="glass-card bento-item span-2 bubble-weekly" id="bubble-weekly-review" data-utility="weeklyReview">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #e11d48, #be123c);">📋</div>
+          <div>
+            <div class="bubble-name">Weekly Review</div>
+            <span class="bubble-hotkey">Alt+W</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="weeklyReview">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="weeklyReview">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="weekly-review-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+    <!-- 14. Life Calculator -->
+    <div class="glass-card bento-item span-2 tall bubble-life" id="bubble-life-calculator" data-utility="lifeCalculator">
+      <div class="bubble-header">
+        <div class="bubble-title">
+          <div class="bubble-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">⏳</div>
+          <div>
+            <div class="bubble-name">Life Expectancy Calculator</div>
+            <span class="bubble-hotkey">Alt+L</span>
+          </div>
+        </div>
+        <div class="bubble-actions">
+          <button class="btn btn-icon btn-secondary" title="Export" data-export="lifeCalculator">📤</button>
+          <button class="btn btn-icon btn-secondary" title="Import" data-import="lifeCalculator">📥</button>
+        </div>
+      </div>
+      <div class="bubble-content" id="life-calculator-content">
+        <!-- Content loaded by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">⚙️ Settings</h2>
+        <button class="modal-close" id="closeSettings">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3 style="margin-bottom: 16px; color: var(--text-secondary);">Enable/Disable Bubbles</h3>
+        <div class="settings-grid" id="settingsGrid">
+          <!-- Settings items loaded by JS -->
+        </div>
+        <div style="margin-top: 24px;">
+          <h3 style="margin-bottom: 16px; color: var(--text-secondary);">Weekly Review Schedule</h3>
+          <div class="input-group">
+            <label class="input-label">Day</label>
+            <select class="input" id="weeklyReviewDay">
+              <option value="0">Sunday</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5" selected>Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Time</label>
+            <input type="time" class="input" id="weeklyReviewTime" value="16:00">
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+            <label class="toggle-switch">
+              <input type="checkbox" id="weeklyReviewDismissible" checked>
+              <span class="toggle-slider-input"></span>
+            </label>
+            <span style="font-size: 14px; color: var(--text-secondary);">Allow dismissing/rescheduling</span>
+          </div>
+        </div>
+        <div style="margin-top: 24px;">
+          <h3 style="margin-bottom: 16px; color: var(--text-secondary);">Flow Check Interval</h3>
+          <div class="input-group">
+            <label class="input-label">Check every (minutes)</label>
+            <input type="number" class="input" id="flowCheckInterval" value="30" min="5" max="120">
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+            <label class="toggle-switch">
+              <input type="checkbox" id="flowCheckPauseable" checked>
+              <span class="toggle-slider-input"></span>
+            </label>
+            <span style="font-size: 14px; color: var(--text-secondary);">Allow pausing during meetings</span>
+          </div>
+        </div>
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--glass-border);">
+          <button class="btn btn-danger" id="resetDataBtn">🗑️ Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">📥 Import Data</h2>
+        <button class="modal-close" id="closeImport">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 16px; color: var(--text-secondary);">Select a CSV file to import data for <strong id="importUtilityName"></strong></p>
+        <input type="file" accept=".csv" class="input" id="importFileInput">
+        <div style="display: flex; align-items: center; gap: 12px; margin-top: 16px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="importMerge">
+            <span class="toggle-slider-input"></span>
+          </label>
+          <span style="font-size: 14px; color: var(--text-secondary);">Merge with existing data</span>
+        </div>
+        <div style="margin-top: 24px;">
+          <button class="btn btn-primary" id="importConfirmBtn">Import</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Hidden file input for imports -->
+  <input type="file" id="globalImportInput" accept=".csv" style="display: none;">
+
+  <!-- Scripts -->
+  <script src="../js/storage.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/sampleData.js"></script>
+  <script src="../js/utils/cognitive-offload.js"></script>
+  <script src="../js/utils/cash-flow.js"></script>
+  <script src="../js/utils/net-worth.js"></script>
+  <script src="../js/utils/stock-watchlist.js"></script>
+  <script src="../js/utils/purpose-gatekeeper.js"></script>
+  <script src="../js/utils/daily-negotiator.js"></script>
+  <script src="../js/utils/question-primer.js"></script>
+  <script src="../js/utils/flow-thermometer.js"></script>
+  <script src="../js/utils/truth-logger.js"></script>
+  <script src="../js/utils/tab-snoozer.js"></script>
+  <script src="../js/utils/mastery-graph.js"></script>
+  <script src="../js/utils/digital-cleaner.js"></script>
+  <script src="../js/utils/weekly-review.js"></script>
+  <script src="../js/utils/life-calculator.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
