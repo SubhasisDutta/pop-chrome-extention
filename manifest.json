@@ -1,0 +1,124 @@
+{
+  "manifest_version": 3,
+  "name": "POP - Personal Organization Platform",
+  "version": "1.0.0",
+  "description": "A collection of productivity bubbles to organize your digital life with GTD, Deep Work, and mindful productivity principles.",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "activeTab",
+    "alarms",
+    "bookmarks",
+    "notifications",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "html/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "POP - Personal Organization Platform"
+  },
+  "background": {
+    "service_worker": "js/background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "cognitive-offload": {
+      "suggested_key": {
+        "default": "Alt+C",
+        "mac": "Alt+C"
+      },
+      "description": "Quick capture a thought (Cognitive Offload)"
+    },
+    "question-primer": {
+      "suggested_key": {
+        "default": "Alt+Q",
+        "mac": "Alt+Q"
+      },
+      "description": "Set your core question (Question Primer)"
+    },
+    "flow-check": {
+      "suggested_key": {
+        "default": "Alt+F",
+        "mac": "Alt+F"
+      },
+      "description": "Check flow state (Flow Thermometer)"
+    },
+    "time-log": {
+      "suggested_key": {
+        "default": "Alt+T",
+        "mac": "Alt+T"
+      },
+      "description": "Log current site (Truth Logger)"
+    },
+    "daily-plan": {
+      "suggested_key": {
+        "default": "Alt+D",
+        "mac": "Alt+D"
+      },
+      "description": "Open daily negotiator"
+    },
+    "open-dashboard": {
+      "suggested_key": {
+        "default": "Alt+P",
+        "mac": "Alt+P"
+      },
+      "description": "Open POP Dashboard"
+    },
+    "net-worth": {
+      "suggested_key": {
+        "default": "Alt+N",
+        "mac": "Alt+N"
+      },
+      "description": "Quick net worth update"
+    },
+    "cash-flow": {
+      "suggested_key": {
+        "default": "Alt+M",
+        "mac": "Alt+M"
+      },
+      "description": "Log transaction (Cash Flow)"
+    },
+    "stock-check": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "Open stock watchlist"
+    },
+    "weekly-review": {
+      "suggested_key": {
+        "default": "Alt+W",
+        "mac": "Alt+W"
+      },
+      "description": "Start weekly review"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/content.js"],
+      "css": ["css/content.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "assets/*", "css/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

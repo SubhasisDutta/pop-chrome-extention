@@ -1,0 +1,339 @@
+/**
+ * Life Expectancy Calculator Utility
+ * Calculate remaining time and financial freedom metrics
+ * Hotkey: Alt+L
+ */
+
+const LifeCalculator = {
+  STORAGE_KEY: 'pop_life_calculator',
+
+  async init() {
+    await this.render();
+    this.bindEvents();
+  },
+
+  async getData() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get([this.STORAGE_KEY], (result) => {
+        resolve(result[this.STORAGE_KEY] || {
+          dob: '',
+          expectedLifespan: 85,
+          weeklyHours: 112,
+          netWorth: 0,
+          monthlySpending: 0,
+          monthlySavings: 0,
+          showInputs: true
+        });
+      });
+    });
+  },
+
+  async saveData(data) {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [this.STORAGE_KEY]: data }, resolve);
+    });
+  },
+
+  async updateData(updates) {
+    const data = await this.getData();
+    Object.assign(data, updates);
+    await this.saveData(data);
+    await this.render();
+  },
+
+  calculateMetrics(data) {
+    if (!data.dob) {
+      return null;
+    }
+
+    const now = new Date();
+    const dob = new Date(data.dob);
+    const expectedEnd = new Date(dob);
+    expectedEnd.setFullYear(expectedEnd.getFullYear() + data.expectedLifespan);
+
+    // Time calculations
+    const ageMs = now - dob;
+    const ageYears = ageMs / (1000 * 60 * 60 * 24 * 365.25);
+    const remainingMs = expectedEnd - now;
+    const remainingWeeks = Math.max(0, Math.floor(remainingMs / (1000 * 60 * 60 * 24 * 7)));
+    const remainingHours = Math.max(0, Math.floor(remainingMs / (1000 * 60 * 60)));
+    const usableHours = remainingWeeks * data.weeklyHours;
+
+    // Life progress
+    const lifeProgress = Math.min(100, (ageYears / data.expectedLifespan) * 100);
+
+    // Financial calculations
+    const hourWorth = data.netWorth > 0 && usableHours > 0 ? data.netWorth / usableHours : 0;
+    const monthlyExpense = Math.max(0, data.monthlySpending - data.monthlySavings);
+    const annualReturn = 0.01; // 1% conservative return
+    const autoIncome = (data.netWorth * annualReturn) / 12;
+    const freedomAim = monthlyExpense > 0 ? (monthlyExpense * 12) / annualReturn : 0;
+    const freedomProgress = freedomAim > 0 ? Math.min(100, (data.netWorth / freedomAim) * 100) : 0;
+
+    return {
+      ageYears: Math.floor(ageYears),
+      remainingWeeks,
+      remainingHours,
+      usableHours,
+      lifeProgress,
+      hourWorth,
+      monthlyExpense,
+      autoIncome,
+      freedomAim,
+      freedomProgress,
+      expectedEnd,
+      daysUntilEnd: Math.floor(remainingMs / (1000 * 60 * 60 * 24))
+    };
+  },
+
+  formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toLocaleString();
+  },
+
+  async render() {
+    const container = document.getElementById('life-calculator-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const metrics = this.calculateMetrics(data);
+
+    if (!metrics) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+          <h3 style="margin-bottom: 8px;">Life Calculator</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+            Set up your life metrics to see your remaining time and financial freedom progress.
+          </p>
+          <button class="btn btn-primary" id="lc-setup">Set Up Now</button>
+        </div>
+      `;
+      return;
+    }
+
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    container.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="font-size: 12px; color: var(--text-muted);">📅 ${today}</div>
+        <button class="btn btn-sm btn-secondary" id="lc-toggle-inputs" style="padding: 4px 8px; font-size: 10px;">
+          ${data.showInputs ? '👁️ Hide Inputs' : '⚙️ Show Inputs'}
+        </button>
+      </div>
+
+      ${data.showInputs ? `
+        <div class="glass-card-flat" style="padding: 12px; margin-bottom: 16px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+            <div class="input-group" style="margin-bottom: 8px;">
+              <label class="input-label" style="font-size: 10px;">Date of Birth</label>
+              <input type="date" class="input lc-input" data-field="dob" value="${data.dob}" style="padding: 8px; font-size: 12px;">
+            </div>
+            <div class="input-group" style="margin-bottom: 8px;">
+              <label class="input-label" style="font-size: 10px;">Expected Lifespan</label>
+              <input type="number" class="input lc-input" data-field="expectedLifespan" value="${data.expectedLifespan}" placeholder="85" style="padding: 8px; font-size: 12px;">
+            </div>
+            <div class="input-group" style="margin-bottom: 8px;">
+              <label class="input-label" style="font-size: 10px;">Net Worth ($)</label>
+              <input type="number" class="input lc-input" data-field="netWorth" value="${data.netWorth}" placeholder="0" style="padding: 8px; font-size: 12px;">
+            </div>
+            <div class="input-group" style="margin-bottom: 8px;">
+              <label class="input-label" style="font-size: 10px;">Weekly Hours</label>
+              <input type="number" class="input lc-input" data-field="weeklyHours" value="${data.weeklyHours}" placeholder="112" style="padding: 8px; font-size: 12px;">
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+              <label class="input-label" style="font-size: 10px;">Monthly Spending ($)</label>
+              <input type="number" class="input lc-input" data-field="monthlySpending" value="${data.monthlySpending}" placeholder="0" style="padding: 8px; font-size: 12px;">
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+              <label class="input-label" style="font-size: 10px;">Monthly Savings ($)</label>
+              <input type="number" class="input lc-input" data-field="monthlySavings" value="${data.monthlySavings}" placeholder="0" style="padding: 8px; font-size: 12px;">
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 12px; color: var(--text-muted);">Age ${metrics.ageYears} • Life Progress</div>
+        <div class="progress-bar" style="height: 12px; margin: 8px 0;">
+          <div class="progress-fill ${metrics.lifeProgress > 75 ? 'danger' : metrics.lifeProgress > 50 ? 'warning' : 'success'}" style="width: ${metrics.lifeProgress}%;"></div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">${metrics.lifeProgress.toFixed(1)}% of expected lifespan</div>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px;">
+        <div class="stat-item" style="padding: 12px;">
+          <div class="stat-value" style="font-size: 20px; color: var(--accent-primary);">${this.formatNumber(metrics.remainingWeeks)}</div>
+          <div class="stat-label">Weeks Left</div>
+        </div>
+        <div class="stat-item" style="padding: 12px;">
+          <div class="stat-value" style="font-size: 20px; color: var(--accent-primary);">${this.formatNumber(metrics.usableHours)}</div>
+          <div class="stat-label">Usable Hours</div>
+        </div>
+        <div class="stat-item" style="padding: 12px;">
+          <div class="stat-value" style="font-size: 20px; color: var(--accent-success);">$${metrics.hourWorth.toFixed(2)}</div>
+          <div class="stat-label">Hour Worth</div>
+        </div>
+        <div class="stat-item" style="padding: 12px;">
+          <div class="stat-value" style="font-size: 20px; color: var(--accent-success);">$${this.formatNumber(Math.round(metrics.autoIncome))}</div>
+          <div class="stat-label">Auto Income/mo</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+          <span>Freedom Progress</span>
+          <span>$${this.formatNumber(data.netWorth)} / $${this.formatNumber(Math.round(metrics.freedomAim))}</span>
+        </div>
+        <div class="progress-bar" style="height: 16px;">
+          <div class="progress-fill success" style="width: ${metrics.freedomProgress}%;"></div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: center;">
+          ${metrics.freedomProgress.toFixed(1)}% to Financial Freedom (1% return covers $${this.formatNumber(Math.round(metrics.monthlyExpense))}/mo expenses)
+        </div>
+      </div>
+
+      <div class="glass-card-flat" style="padding: 12px; text-align: center;">
+        <div style="font-size: 11px; color: var(--text-muted);">Expected End Date</div>
+        <div style="font-size: 14px; font-weight: 600;">
+          ${metrics.expectedEnd.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted);">${this.formatNumber(metrics.daysUntilEnd)} days remaining</div>
+      </div>
+    `;
+  },
+
+  bindEvents() {
+    document.addEventListener('click', async (e) => {
+      if (e.target.id === 'lc-setup') {
+        this.showSetupModal();
+      }
+
+      if (e.target.id === 'lc-toggle-inputs') {
+        const data = await this.getData();
+        await this.updateData({ showInputs: !data.showInputs });
+      }
+    });
+
+    document.addEventListener('change', async (e) => {
+      if (e.target.classList.contains('lc-input')) {
+        const field = e.target.dataset.field;
+        let value = e.target.value;
+
+        if (field !== 'dob') {
+          value = parseFloat(value) || 0;
+        }
+
+        await this.updateData({ [field]: value });
+      }
+    });
+  },
+
+  showSetupModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.id = 'lc-setup-modal';
+    modal.innerHTML = `
+      <div class="modal" style="max-width: 450px;">
+        <div class="modal-header">
+          <h2 class="modal-title">⏳ Life Calculator Setup</h2>
+          <button class="modal-close" onclick="document.getElementById('lc-setup-modal').remove()">&times;</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+          Enter your information to calculate your remaining time and financial freedom metrics.
+        </p>
+        <div class="input-group">
+          <label class="input-label">Date of Birth</label>
+          <input type="date" class="input" id="lc-dob">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Expected Lifespan (years)</label>
+          <input type="number" class="input" id="lc-lifespan" value="85" min="1" max="120">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Weekly Usable Hours (awake, productive)</label>
+          <input type="number" class="input" id="lc-hours" value="112" min="1" max="168">
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Default: 16 hours/day × 7 days = 112</div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Current Net Worth ($)</label>
+          <input type="number" class="input" id="lc-networth" value="0" min="0">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Monthly Spending ($)</label>
+          <input type="number" class="input" id="lc-spending" value="0" min="0">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Monthly Savings ($)</label>
+          <input type="number" class="input" id="lc-savings" value="0" min="0">
+        </div>
+        <button class="btn btn-primary" id="lc-save-setup" style="width: 100%; margin-top: 16px;">Calculate My Life</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('#lc-save-setup').addEventListener('click', async () => {
+      const dob = modal.querySelector('#lc-dob').value;
+      if (!dob) {
+        window.showToast?.('Please enter your date of birth', 'error');
+        return;
+      }
+
+      await this.updateData({
+        dob,
+        expectedLifespan: parseInt(modal.querySelector('#lc-lifespan').value) || 85,
+        weeklyHours: parseInt(modal.querySelector('#lc-hours').value) || 112,
+        netWorth: parseFloat(modal.querySelector('#lc-networth').value) || 0,
+        monthlySpending: parseFloat(modal.querySelector('#lc-spending').value) || 0,
+        monthlySavings: parseFloat(modal.querySelector('#lc-savings').value) || 0
+      });
+
+      window.showToast?.('Life calculator set up!', 'success');
+      modal.remove();
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+  },
+
+  async exportToCSV() {
+    const data = await this.getData();
+    let csv = 'field,value\n';
+    Object.entries(data).forEach(([k, v]) => {
+      csv += `"${k}","${v}"\n`;
+    });
+    return csv;
+  },
+
+  async importFromCSV(csvContent, merge = false) {
+    try {
+      const lines = csvContent.trim().split('\n');
+      const updates = {};
+      for (let i = 1; i < lines.length; i++) {
+        const parts = lines[i].split(',').map(v => v.replace(/^"|"$/g, ''));
+        if (parts.length >= 2) {
+          const [field, value] = parts;
+          if (field === 'dob') {
+            updates[field] = value;
+          } else if (field === 'showInputs') {
+            updates[field] = value === 'true';
+          } else {
+            updates[field] = parseFloat(value) || 0;
+          }
+        }
+      }
+      await this.updateData(updates);
+      return { success: true, count: Object.keys(updates).length };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => LifeCalculator.init());
+} else {
+  LifeCalculator.init();
+}
