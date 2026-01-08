@@ -40,28 +40,28 @@
     "cognitive-offload": {
       "suggested_key": {
         "default": "Alt+C",
-        "mac": "Alt+C"
+        "mac": "MacCtrl+C"
       },
       "description": "Quick capture a thought (Cognitive Offload)"
     },
     "time-log": {
       "suggested_key": {
         "default": "Alt+T",
-        "mac": "Alt+T"
+        "mac": "MacCtrl+T"
       },
       "description": "Log current site (Truth Logger)"
     },
     "daily-plan": {
       "suggested_key": {
         "default": "Alt+D",
-        "mac": "Alt+D"
+        "mac": "MacCtrl+D"
       },
       "description": "Open daily negotiator"
     },
     "open-dashboard": {
       "suggested_key": {
         "default": "Alt+P",
-        "mac": "Alt+P"
+        "mac": "MacCtrl+P"
       },
       "description": "Open POP Dashboard"
     }
