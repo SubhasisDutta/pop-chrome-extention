@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -187,6 +188,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="header">
     <div class="logo">P</div>
@@ -243,64 +245,7 @@
 
   <div class="toast" id="toast">Thought captured!</div>
 
-  <script>
-    // Quick capture functionality
-    const input = document.getElementById('quickInput');
-    const actionableBtn = document.getElementById('actionableBtn');
-    const referenceBtn = document.getElementById('referenceBtn');
-    const toast = document.getElementById('toast');
-
-    function showToast(message) {
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2000);
-    }
-
-    function saveThought(type) {
-      const text = input.value.trim();
-      if (!text) return;
-
-      chrome.runtime.sendMessage({
-        action: 'saveThought',
-        text,
-        type
-      }, (response) => {
-        if (response && response.success) {
-          showToast(`Captured as ${type}!`);
-          input.value = '';
-        }
-      });
-    }
-
-    actionableBtn.addEventListener('click', () => saveThought('actionable'));
-    referenceBtn.addEventListener('click', () => saveThought('reference'));
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        saveThought('actionable');
-      }
-    });
-
-    // Menu item clicks
-    document.querySelectorAll('.menu-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const action = item.dataset.action;
-        chrome.runtime.sendMessage({
-          action: 'openDashboard',
-          hash: action
-        });
-        window.close();
-      });
-    });
-
-    // Open dashboard button
-    document.getElementById('openDashboard').addEventListener('click', () => {
-      chrome.runtime.sendMessage({ action: 'openDashboard' });
-      window.close();
-    });
-
-    // Focus input on open
-    input.focus();
-  </script>
+  <script src="../js/popup.js"></script>
 </body>
+
 </html>
