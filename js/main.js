@@ -95,8 +95,18 @@ async function renderSettings() {
     lifeCalculator: '⏳'
   };
 
+  // Define actual shortcuts from manifest.json
+  const isMac = /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent);
+  const shortcuts = {
+    cognitiveOffload: isMac ? 'MacCtrl+C' : 'Alt+C',
+    dailyNegotiator: isMac ? 'MacCtrl+D' : 'Alt+D',
+    truthLogger: isMac ? 'MacCtrl+T' : 'Alt+T'
+    // open-dashboard (Alt+P / MacCtrl+P) is not a utility, it's for opening the dashboard
+  };
+
   grid.innerHTML = Object.entries(settings.utilities).map(([key, config]) => {
     const util = UTILITY_MAP[key];
+    const shortcut = shortcuts[key];
     return `
       <div class="settings-item">
         <div class="settings-item-info">
@@ -105,7 +115,7 @@ async function renderSettings() {
           </div>
           <div class="settings-item-text">
             <h4>${util?.name || key}</h4>
-            <p>${config.hotkey}</p>
+            ${shortcut ? `<p>${shortcut}</p>` : ''}
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 16px;">
@@ -218,75 +228,48 @@ function setupExportImportInSettings() {
       document.getElementById('importModal').classList.add('active');
     });
   });
-}
 
-function setupExportImport() {
-  // Export buttons
-  document.querySelectorAll('[data-export]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const utilityKey = btn.dataset.export;
-      const util = UTILITY_MAP[utilityKey];
+  // Import confirm button (shared for all imports)
+  // Remove any existing listeners to avoid duplicates
+  const importConfirmBtn = document.getElementById('importConfirmBtn');
+  if (importConfirmBtn) {
+    const newBtn = importConfirmBtn.cloneNode(true);
+    importConfirmBtn.parentNode.replaceChild(newBtn, importConfirmBtn);
+
+    newBtn.addEventListener('click', async () => {
+      const fileInput = document.getElementById('importFileInput');
+      const merge = document.getElementById('importMerge').checked;
+
+      if (!fileInput.files.length) {
+        showToast('Please select a file', 'error');
+        return;
+      }
+
+      const util = UTILITY_MAP[currentImportUtility];
       if (!util || !util.module) return;
 
       try {
-        const csv = await util.module.exportToCSV();
-        if (csv) {
-          POPStorage.downloadCSV(csv, util.name.toLowerCase().replace(/\s+/g, '-'));
-          showToast(`${util.name} exported!`, 'success');
+        const content = await POPStorage.readCSVFile(fileInput.files[0]);
+        const result = await util.module.importFromCSV(content, merge);
+
+        if (result.success) {
+          showToast(`Imported ${result.count} items!`, 'success');
+          document.getElementById('importModal').classList.remove('active');
+          // Reload the current utility if visible
+          if (util.module.init) {
+            await util.module.init();
+          }
         } else {
-          showToast('No data to export', 'warning');
+          showToast(result.message || 'Import failed', 'error');
         }
       } catch (e) {
-        showToast('Export failed', 'error');
+        showToast('Import failed: ' + e.message, 'error');
         console.error(e);
       }
     });
-  });
-
-  // Import buttons
-  document.querySelectorAll('[data-import]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const utilityKey = btn.dataset.import;
-      const util = UTILITY_MAP[utilityKey];
-      if (!util) return;
-
-      currentImportUtility = utilityKey;
-      document.getElementById('importUtilityName').textContent = util.name;
-      document.getElementById('importFileInput').value = '';
-      document.getElementById('importMerge').checked = false;
-      document.getElementById('importModal').classList.add('active');
-    });
-  });
-
-  // Import confirm
-  document.getElementById('importConfirmBtn')?.addEventListener('click', async () => {
-    const fileInput = document.getElementById('importFileInput');
-    const merge = document.getElementById('importMerge').checked;
-
-    if (!fileInput.files.length) {
-      showToast('Please select a file', 'error');
-      return;
-    }
-
-    const util = UTILITY_MAP[currentImportUtility];
-    if (!util || !util.module) return;
-
-    try {
-      const content = await POPStorage.readCSVFile(fileInput.files[0]);
-      const result = await util.module.importFromCSV(content, merge);
-
-      if (result.success) {
-        showToast(`Imported ${result.count} items!`, 'success');
-        document.getElementById('importModal').classList.remove('active');
-      } else {
-        showToast(result.message || 'Import failed', 'error');
-      }
-    } catch (e) {
-      showToast('Import failed: ' + e.message, 'error');
-      console.error(e);
-    }
-  });
+  }
 }
+
 
 // Export all data
 async function exportAllData() {
@@ -379,9 +362,6 @@ async function init() {
 
   // Setup modals
   setupModals();
-
-  // Setup export/import
-  setupExportImport();
 
   // Setup theme toggle
   setupThemeToggle();
