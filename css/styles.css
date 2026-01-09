@@ -13,8 +13,8 @@
   --text-primary: #1a1a2e;
   --text-secondary: #4a4a6a;
   --text-muted: #6a6a8a;
-  --accent-primary: #667eea;
-  --accent-secondary: #764ba2;
+  --accent-primary: #ff9ebc;
+  --accent-secondary: #ffb7ce;
   --accent-success: #10b981;
   --accent-warning: #f59e0b;
   --accent-danger: #ef4444;
@@ -25,7 +25,7 @@
   --bubble-active: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --bubble-inactive: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
   --scrollbar-track: rgba(255, 255, 255, 0.1);
-  --scrollbar-thumb: rgba(102, 126, 234, 0.5);
+  --scrollbar-thumb: rgba(255, 158, 188, 0.5);
 }
 
 [data-theme="dark"] {
@@ -38,8 +38,8 @@
   --text-primary: #ffffff;
   --text-secondary: #e0e0e0;
   --text-muted: #a0a0a0;
-  --accent-primary: #818cf8;
-  --accent-secondary: #a78bfa;
+  --accent-primary: #ff9ebc;
+  --accent-secondary: #ffb7ce;
   --accent-success: #34d399;
   --accent-warning: #fbbf24;
   --accent-danger: #f87171;
@@ -50,7 +50,7 @@
   --bubble-active: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   --bubble-inactive: linear-gradient(135deg, #475569 0%, #334155 100%);
   --scrollbar-track: rgba(0, 0, 0, 0.2);
-  --scrollbar-thumb: rgba(129, 140, 248, 0.5);
+  --scrollbar-thumb: rgba(255, 158, 188, 0.5);
 }
 
 /* Reset & Base Styles */
@@ -252,6 +252,8 @@ body {
   top: 50%;
   transform: translateY(-50%);
   font-size: 14px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .theme-toggle::after {
@@ -261,6 +263,8 @@ body {
   top: 50%;
   transform: translateY(-50%);
   font-size: 14px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .theme-toggle .toggle-slider {
@@ -273,6 +277,7 @@ body {
   left: 4px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
 [data-theme="dark"] .theme-toggle .toggle-slider {
@@ -298,12 +303,12 @@ body {
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 158, 188, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 20px rgba(255, 158, 188, 0.5);
 }
 
 .btn-secondary {
@@ -378,7 +383,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 3px rgba(255, 158, 188, 0.2);
 }
 
 .input::placeholder {
@@ -773,7 +778,7 @@ select.input {
   color: white;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 158, 188, 0.4);
   transition: all 0.3s ease;
 }
 
