@@ -8,7 +8,7 @@
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   width: 320px;
-  background: linear-gradient(135deg, #ff9ebc 0%, #ffb7ce 100%);
+  background: linear-gradient(135deg, #c94b6f 0%, #db6688 100%);
   color: white;
   padding: 16px;
 }
@@ -39,7 +39,7 @@ body {
 
 .subtitle {
   font-size: 11px;
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
 .quick-capture {
@@ -62,7 +62,7 @@ body {
 }
 
 .quick-capture input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .quick-capture input:focus {
@@ -134,7 +134,8 @@ body {
 
 .menu-item-label {
   font-size: 11px;
-  opacity: 0.9;
+  opacity: 1;
+  font-weight: 500;
 }
 
 .open-dashboard {
@@ -157,8 +158,14 @@ body {
 
 .hotkey {
   font-size: 9px;
-  opacity: 0.6;
+  opacity: 0.8;
   margin-top: 2px;
+  font-family: monospace;
+}
+
+.hotkey-inline {
+  font-size: 11px;
+  opacity: 0.8;
   font-family: monospace;
 }
 

@@ -1,3 +1,38 @@
+// Setup OS-specific shortcuts
+function setupShortcuts() {
+    const isMac = /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent);
+
+    // Update input placeholder with OS-specific shortcut
+    const input = document.getElementById('quickInput');
+    if (input) {
+        const shortcut = isMac ? 'MacCtrl+C' : 'Alt+C';
+        input.placeholder = `Capture a thought... (${shortcut})`;
+    }
+
+    // Update Daily Plan shortcut (only one with a shortcut in the menu)
+    const dailyPlanBtn = document.querySelector('[data-action="daily-negotiator"]');
+    if (dailyPlanBtn) {
+        const hotkeyEl = dailyPlanBtn.querySelector('.hotkey');
+        if (hotkeyEl) {
+            const shortcut = isMac ? 'MacCtrl+D' : 'Alt+D';
+            hotkeyEl.textContent = shortcut;
+        }
+    }
+
+    // Update Open Dashboard shortcut
+    const dashboardBtn = document.getElementById('openDashboard');
+    if (dashboardBtn) {
+        const hotkeyEl = dashboardBtn.querySelector('.hotkey-inline');
+        if (hotkeyEl) {
+            const shortcut = isMac ? 'MacCtrl+P' : 'Alt+P';
+            hotkeyEl.textContent = `(${shortcut})`;
+        }
+    }
+}
+
+// Initialize shortcuts on load
+setupShortcuts();
+
 // Quick capture functionality
 const input = document.getElementById('quickInput');
 const actionableBtn = document.getElementById('actionableBtn');

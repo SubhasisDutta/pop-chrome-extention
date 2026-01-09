@@ -18,7 +18,7 @@
   </div>
 
   <div class="quick-capture">
-    <input type="text" id="quickInput" placeholder="Capture a thought... (Alt+C)">
+    <input type="text" id="quickInput" placeholder="Capture a thought...">
     <div class="tag-buttons">
       <button class="tag-btn actionable" id="actionableBtn">✓ Actionable</button>
       <button class="tag-btn reference" id="referenceBtn">📚 Reference</button>
@@ -26,40 +26,35 @@
   </div>
 
   <div class="menu">
-    <button class="menu-item" data-action="daily-negotiator">
+    <button class="menu-item" data-action="daily-negotiator" data-has-shortcut="true">
       <span class="menu-item-icon">☀️</span>
       <span class="menu-item-label">Daily Plan</span>
-      <div class="hotkey">Alt+D</div>
+      <div class="hotkey"></div>
     </button>
     <button class="menu-item" data-action="cash-flow">
       <span class="menu-item-icon">💰</span>
       <span class="menu-item-label">Cash Flow</span>
-      <div class="hotkey">Alt+M</div>
     </button>
     <button class="menu-item" data-action="question-primer">
       <span class="menu-item-icon">❓</span>
       <span class="menu-item-label">Questions</span>
-      <div class="hotkey">Alt+Q</div>
     </button>
     <button class="menu-item" data-action="flow-thermometer">
       <span class="menu-item-icon">🌡️</span>
       <span class="menu-item-label">Flow Check</span>
-      <div class="hotkey">Alt+F</div>
     </button>
     <button class="menu-item" data-action="stock-watchlist">
       <span class="menu-item-icon">📊</span>
       <span class="menu-item-label">Stocks</span>
-      <div class="hotkey">Alt+S</div>
     </button>
     <button class="menu-item" data-action="weekly-review">
       <span class="menu-item-icon">📋</span>
       <span class="menu-item-label">Weekly Review</span>
-      <div class="hotkey">Alt+W</div>
     </button>
   </div>
 
   <button class="open-dashboard" id="openDashboard">
-    🚀 Open Full Dashboard (Alt+P)
+    🚀 Open Full Dashboard <span class="hotkey-inline"></span>
   </button>
 
   <div class="toast" id="toast">Thought captured!</div>
