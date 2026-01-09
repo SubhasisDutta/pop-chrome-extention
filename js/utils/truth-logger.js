@@ -73,6 +73,13 @@ const TruthLogger = {
     return { score, deep: todayLog.deep, shallow: todayLog.shallow, verdict };
   },
 
+  getTodayStats(timeLog) {
+    const todayKey = this.getTodayKey();
+    const todayLog = timeLog.find(l => l.date.startsWith(todayKey));
+    if (!todayLog) return { deep: 0, shallow: 0 };
+    return { deep: todayLog.deep || 0, shallow: todayLog.shallow || 0 };
+  },
+
   formatMinutes(minutes) {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
