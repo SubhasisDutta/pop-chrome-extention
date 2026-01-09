@@ -108,10 +108,16 @@ async function renderSettings() {
             <p>${config.hotkey}</p>
           </div>
         </div>
-        <label class="toggle-switch">
-          <input type="checkbox" data-utility="${key}" ${config.enabled ? 'checked' : ''}>
-          <span class="toggle-slider-input"></span>
-        </label>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="display: flex; gap: 8px; font-size: 13px;">
+            <a href="#" class="settings-action-link" data-export="${key}" title="Export ${util?.name || key}">📤 Export</a>
+            <a href="#" class="settings-action-link" data-import="${key}" title="Import ${util?.name || key}">📥 Import</a>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" data-utility="${key}" ${config.enabled ? 'checked' : ''}>
+            <span class="toggle-slider-input"></span>
+          </label>
+        </div>
       </div>
     `;
   }).join('');
@@ -147,6 +153,9 @@ async function renderSettings() {
   // Load flow check settings
   document.getElementById('flowCheckInterval').value = settings.flowCheckInterval || 30;
   document.getElementById('flowCheckPauseable').checked = settings.flowCheckPauseable !== false;
+
+  // Setup export/import event listeners for settings items
+  setupExportImportInSettings();
 }
 
 // Save settings
@@ -169,6 +178,47 @@ async function saveAllSettings() {
 
 // Export/Import handling
 let currentImportUtility = null;
+
+function setupExportImportInSettings() {
+  // Export links in settings
+  document.querySelectorAll('.settings-action-link[data-export]').forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const utilityKey = link.dataset.export;
+      const util = UTILITY_MAP[utilityKey];
+      if (!util || !util.module) return;
+
+      try {
+        const csv = await util.module.exportToCSV();
+        if (csv) {
+          POPStorage.downloadCSV(csv, util.name.toLowerCase().replace(/\s+/g, '-'));
+          showToast(`${util.name} exported!`, 'success');
+        } else {
+          showToast('No data to export', 'warning');
+        }
+      } catch (e) {
+        showToast('Export failed', 'error');
+        console.error(e);
+      }
+    });
+  });
+
+  // Import links in settings
+  document.querySelectorAll('.settings-action-link[data-import]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const utilityKey = link.dataset.import;
+      const util = UTILITY_MAP[utilityKey];
+      if (!util) return;
+
+      currentImportUtility = utilityKey;
+      document.getElementById('importUtilityName').textContent = util.name;
+      document.getElementById('importFileInput').value = '';
+      document.getElementById('importMerge').checked = false;
+      document.getElementById('importModal').classList.add('active');
+    });
+  });
+}
 
 function setupExportImport() {
   // Export buttons

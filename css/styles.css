@@ -924,6 +924,20 @@ select.input {
   color: var(--text-muted);
 }
 
+.settings-action-link {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.settings-action-link:hover {
+  background: var(--glass-bg);
+  color: var(--accent-hover);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header {
