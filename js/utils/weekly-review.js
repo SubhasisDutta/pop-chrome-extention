@@ -336,6 +336,83 @@ const WeeklyReview = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with all reviews
+   */
+  async renderExpanded() {
+    const container = document.getElementById('weekly-review-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const lastReview = data.reviews[0];
+    const nextReview = this.getNextReviewDate(data);
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">📋</span>Weekly Review</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value">${data.reviews.length}</div><div class="expanded-stat-label">Reviews</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${dayNames[data.schedule.day]}</div><div class="expanded-stat-label">Review Day</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${this.formatTimeUntil(nextReview)}</div><div class="expanded-stat-label">Next Review</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="wr-exp-start">📋 Start Weekly Review</button>
+          <button class="btn btn-secondary" id="wr-exp-settings">⚙️ Settings</button>
+        </div>
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>❓</span> Review Questions (${data.questions.length})</div>
+            <ul class="item-list">
+              ${data.questions.map((q, i) => `<li><span style="font-weight: 600; color: var(--accent-primary);">${i + 1}.</span><span style="margin-left: 8px;">${q}</span></li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📅</span> Schedule</div>
+            <div style="text-align: center; padding: 24px;">
+              <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
+              <div style="font-size: 20px; font-weight: 700;">${dayNames[data.schedule.day]}s</div>
+              <div style="font-size: 16px; color: var(--text-muted);">at ${String(data.schedule.hour).padStart(2, '0')}:${String(data.schedule.minute).padStart(2, '0')}</div>
+              <div style="font-size: 14px; color: var(--accent-primary); margin-top: 12px;">Next: ${nextReview.toLocaleDateString()} (${this.formatTimeUntil(nextReview)})</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title"><span>📜</span> Past Reviews (${data.reviews.length})</div>
+          ${data.reviews.length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 40px;">No reviews yet. Start your first one!</div>' : `
+            <div class="expanded-list" style="max-height: 400px; overflow-y: auto;">
+              ${data.reviews.slice(0, 12).map(review => `
+                <div style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div style="font-weight: 600;">📅 ${new Date(review.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                  </div>
+                  ${Object.entries(review.responses).map(([q, a]) => `
+                    <div style="margin-bottom: 8px;">
+                      <div style="font-size: 12px; color: var(--accent-primary); font-weight: 500;">${q}</div>
+                      <div style="font-size: 13px; color: var(--text-secondary); padding: 8px; background: rgba(0,0,0,0.05); border-radius: 8px; margin-top: 4px;">${this.escapeHtml(a) || '<em style="color: var(--text-muted);">No response</em>'}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+
+    const startBtn = container.querySelector('#wr-exp-start');
+    if (startBtn) startBtn.onclick = () => this.showReviewModal();
+
+    const settingsBtn = container.querySelector('#wr-exp-settings');
+    if (settingsBtn) settingsBtn.onclick = () => this.showSettingsModal();
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'date,question,response\n';

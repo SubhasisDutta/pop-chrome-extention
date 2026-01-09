@@ -256,6 +256,120 @@ const PurposeGatekeeper = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with full task/purpose management
+   */
+  async renderExpanded() {
+    const container = document.getElementById('purpose-gatekeeper-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const activeTasks = data.tasks.filter(t => !t.completed);
+    const completedTasks = data.tasks.filter(t => t.completed);
+    const autonomousTasks = activeTasks.filter(t => t.autonomy === 'choose').length;
+    const controlledTasks = activeTasks.filter(t => t.autonomy === 'have').length;
+    const total = autonomousTasks + controlledTasks;
+    const autonomyPercent = total > 0 ? Math.round((autonomousTasks / total) * 100) : 0;
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title">
+            <span class="expanded-title-icon">🎯</span>
+            Purpose Gatekeeper
+          </div>
+          <div class="expanded-stats">
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: ${autonomyPercent >= 50 ? 'var(--accent-success)' : 'var(--accent-warning)'};">${autonomyPercent}%</div>
+              <div class="expanded-stat-label">Autonomy Score</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value">${activeTasks.length}</div>
+              <div class="expanded-stat-label">Active</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--accent-success);">${completedTasks.length}</div>
+              <div class="expanded-stat-label">Completed</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value">${data.purposes.length}</div>
+              <div class="expanded-stat-label">Purposes</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <button class="btn btn-primary" id="pg-expanded-add">+ Add Task with Purpose</button>
+        </div>
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📊</span> Autonomy Breakdown</div>
+            <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+              <div style="flex: 1; text-align: center; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 12px;">
+                <div style="font-size: 32px; font-weight: 700; color: var(--accent-success);">${autonomousTasks}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">🎯 Choose To</div>
+              </div>
+              <div style="flex: 1; text-align: center; padding: 20px; background: rgba(245, 158, 11, 0.1); border-radius: 12px;">
+                <div style="font-size: 32px; font-weight: 700; color: var(--accent-warning);">${controlledTasks}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">⚡ Have To</div>
+              </div>
+            </div>
+            <div class="progress-bar" style="height: 16px;">
+              <div class="progress-fill ${autonomyPercent >= 50 ? 'success' : 'warning'}" style="width: ${autonomyPercent}%;"></div>
+            </div>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>🎯</span> Purposes (${data.purposes.length})</div>
+            <ul class="item-list" style="max-height: 200px;">
+              ${data.purposes.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No purposes defined</li>' : data.purposes.map(p => {
+                const taskCount = data.tasks.filter(t => t.purposeId === p.id && !t.completed).length;
+                return `<li><div style="display: flex; align-items: center; gap: 12px; flex: 1;"><div style="width: 12px; height: 12px; border-radius: 50%; background: ${p.color};"></div><div>${this.escapeHtml(p.name)}</div></div><span class="tag">${taskCount} active</span></li>`;
+              }).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <div class="expanded-grid-2">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📋</span> Active Tasks (${activeTasks.length})</div>
+            <ul class="item-list expanded-list">
+              ${activeTasks.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No active tasks</li>' : activeTasks.map(task => {
+                const purpose = data.purposes.find(p => p.id === task.purposeId);
+                return `<li data-id="${task.id}"><div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;"><input type="checkbox" class="pg-exp-checkbox"><div style="width: 8px; height: 8px; border-radius: 50%; background: ${purpose?.color || 'var(--text-muted)'}; flex-shrink: 0;"></div><div style="flex: 1; min-width: 0;"><div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.escapeHtml(task.text)}</div><div style="font-size: 10px; color: var(--text-muted);">${purpose?.name || 'No purpose'} • ${task.autonomy === 'choose' ? '🎯 Choose' : '⚡ Have to'}</div></div></div><button class="btn btn-icon btn-sm pg-exp-delete" style="opacity: 0.5;">×</button></li>`;
+              }).join('')}
+            </ul>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title" style="color: var(--accent-success);"><span>✅</span> Completed (${completedTasks.length})</div>
+            <ul class="item-list expanded-list">
+              ${completedTasks.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No completed tasks</li>' : completedTasks.slice(0, 20).map(task => `<li data-id="${task.id}" style="opacity: 0.6;"><div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;"><input type="checkbox" checked class="pg-exp-checkbox"><div style="flex: 1; min-width: 0; text-decoration: line-through;">${this.escapeHtml(task.text)}</div></div></li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const addBtn = container.querySelector('#pg-expanded-add');
+    if (addBtn) addBtn.onclick = () => this.showAddTaskModal();
+
+    container.querySelectorAll('.pg-exp-checkbox').forEach(cb => {
+      cb.onchange = async (e) => {
+        const li = e.target.closest('li');
+        if (li) { await this.toggleTask(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('purposeGatekeeper')) this.renderExpanded(); }
+      };
+    });
+
+    container.querySelectorAll('.pg-exp-delete').forEach(btn => {
+      btn.onclick = async (e) => {
+        const li = e.target.closest('li');
+        if (li) { await this.deleteTask(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('purposeGatekeeper')) this.renderExpanded(); }
+      };
+    });
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,text,purposeId,purposeName,autonomy,completed,createdAt\n';

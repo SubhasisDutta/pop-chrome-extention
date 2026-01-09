@@ -303,6 +303,214 @@ const CognitiveOffload = {
   },
 
   /**
+   * Render expanded view with full features
+   */
+  async renderExpanded() {
+    const container = document.getElementById('cognitive-offload-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const actionableThoughts = data.thoughts.filter(t => t.type === 'actionable');
+    const referenceThoughts = data.thoughts.filter(t => t.type === 'reference');
+    const completedCount = data.thoughts.filter(t => t.completed).length;
+    const activeCount = data.thoughts.filter(t => !t.completed).length;
+
+    // Group by date
+    const groupedByDate = {};
+    data.thoughts.forEach(t => {
+      const dateKey = new Date(t.createdAt).toLocaleDateString();
+      if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
+      groupedByDate[dateKey].push(t);
+    });
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title">
+            <span class="expanded-title-icon">💡</span>
+            Cognitive Offload
+          </div>
+          <div class="expanded-stats">
+            <div class="expanded-stat">
+              <div class="expanded-stat-value">${data.thoughts.length}</div>
+              <div class="expanded-stat-label">Total Thoughts</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--accent-success);">${activeCount}</div>
+              <div class="expanded-stat-label">Active</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--text-muted);">${completedCount}</div>
+              <div class="expanded-stat-label">Completed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title">
+              <span>✓</span> Quick Capture
+            </div>
+            <div class="input-group" style="margin-bottom: 12px;">
+              <input type="text" class="input" id="co-expanded-input" placeholder="What's on your mind?">
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm" id="co-expanded-actionable" style="flex: 1; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                ✓ Actionable
+              </button>
+              <button class="btn btn-sm" id="co-expanded-reference" style="flex: 1; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
+                📚 Reference
+              </button>
+            </div>
+          </div>
+          <div class="expanded-section">
+            <div class="expanded-section-title">
+              <span>📊</span> Statistics
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+              <div class="stat-item">
+                <div class="stat-value" style="color: var(--accent-success);">${actionableThoughts.filter(t => !t.completed).length}</div>
+                <div class="stat-label">Actionable Pending</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" style="color: var(--accent-info);">${referenceThoughts.length}</div>
+                <div class="stat-label">References</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">${Object.keys(groupedByDate).length}</div>
+                <div class="stat-label">Days Active</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">${completedCount > 0 ? Math.round((completedCount / data.thoughts.length) * 100) : 0}%</div>
+                <div class="stat-label">Completion Rate</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-grid-2">
+          <div class="expanded-section">
+            <div class="expanded-section-title">
+              <span style="color: var(--accent-success);">✓</span> Actionable Items (${actionableThoughts.length})
+            </div>
+            <ul class="item-list expanded-list">
+              ${actionableThoughts.length === 0 ? `
+                <li style="justify-content: center; color: var(--text-muted);">No actionable items</li>
+              ` : actionableThoughts.map(thought => `
+                <li data-id="${thought.id}" style="${thought.completed ? 'opacity: 0.5;' : ''}">
+                  <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                    <input type="checkbox" ${thought.completed ? 'checked' : ''} class="co-expanded-checkbox" style="cursor: pointer; width: 18px; height: 18px;">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="${thought.completed ? 'text-decoration: line-through;' : ''}">${this.escapeHtml(thought.text)}</div>
+                      <div style="font-size: 11px; color: var(--text-muted);">${new Date(thought.createdAt).toLocaleDateString()} ${new Date(thought.createdAt).toLocaleTimeString()}</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-icon btn-sm co-expanded-delete" style="opacity: 0.5;">🗑️</button>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+          <div class="expanded-section">
+            <div class="expanded-section-title">
+              <span style="color: var(--accent-info);">📚</span> Reference Items (${referenceThoughts.length})
+            </div>
+            <ul class="item-list expanded-list">
+              ${referenceThoughts.length === 0 ? `
+                <li style="justify-content: center; color: var(--text-muted);">No reference items</li>
+              ` : referenceThoughts.map(thought => `
+                <li data-id="${thought.id}">
+                  <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                    <span style="font-size: 16px;">📚</span>
+                    <div style="flex: 1; min-width: 0;">
+                      <div>${this.escapeHtml(thought.text)}</div>
+                      <div style="font-size: 11px; color: var(--text-muted);">${new Date(thought.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-icon btn-sm co-expanded-delete" style="opacity: 0.5;">🗑️</button>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.bindExpandedEvents();
+  },
+
+  /**
+   * Bind expanded view events
+   */
+  bindExpandedEvents() {
+    const container = document.getElementById('cognitive-offload-content');
+    if (!container) return;
+
+    // Quick capture in expanded view
+    const expandedInput = container.querySelector('#co-expanded-input');
+    const actionableBtn = container.querySelector('#co-expanded-actionable');
+    const referenceBtn = container.querySelector('#co-expanded-reference');
+
+    if (actionableBtn) {
+      actionableBtn.onclick = async () => {
+        if (expandedInput && expandedInput.value.trim()) {
+          await this.addThought(expandedInput.value.trim(), 'actionable');
+          expandedInput.value = '';
+          this.showToast('Thought captured as Actionable!', 'success');
+          if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('cognitiveOffload')) {
+            this.renderExpanded();
+          }
+        }
+      };
+    }
+
+    if (referenceBtn) {
+      referenceBtn.onclick = async () => {
+        if (expandedInput && expandedInput.value.trim()) {
+          await this.addThought(expandedInput.value.trim(), 'reference');
+          expandedInput.value = '';
+          this.showToast('Thought captured as Reference!', 'success');
+          if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('cognitiveOffload')) {
+            this.renderExpanded();
+          }
+        }
+      };
+    }
+
+    // Delete buttons
+    container.querySelectorAll('.co-expanded-delete').forEach(btn => {
+      btn.onclick = async (e) => {
+        const li = e.target.closest('li');
+        if (li) {
+          await this.deleteThought(li.dataset.id);
+          if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('cognitiveOffload')) {
+            this.renderExpanded();
+          }
+        }
+      };
+    });
+
+    // Checkboxes
+    container.querySelectorAll('.co-expanded-checkbox').forEach(cb => {
+      cb.onchange = async (e) => {
+        const li = e.target.closest('li');
+        if (li) {
+          await this.toggleComplete(li.dataset.id);
+          if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('cognitiveOffload')) {
+            this.renderExpanded();
+          }
+        }
+      };
+    });
+
+    // Enter key
+    if (expandedInput) {
+      expandedInput.onkeydown = (e) => {
+        if (e.key === 'Enter' && actionableBtn) actionableBtn.click();
+      };
+    }
+  },
+
+  /**
    * Export data to CSV
    */
   async exportToCSV() {

@@ -359,6 +359,112 @@ const DailyNegotiator = {
     } catch (error) {
       return { success: false, message: error.message };
     }
+  },
+
+  /**
+   * Render expanded view with full daily planning features
+   */
+  async renderExpanded() {
+    const container = document.getElementById('daily-negotiator-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const todayPlan = this.getTodayPlan(data.plans);
+    const completedToday = todayPlan ? todayPlan.tasks.filter(t => t.completed).length : 0;
+    const totalToday = todayPlan ? todayPlan.tasks.length : 0;
+    const hardTasks = todayPlan ? todayPlan.tasks.filter(t => t.isHard && !t.completed) : [];
+    const rewards = todayPlan ? todayPlan.tasks.filter(t => t.reward && !t.completed) : [];
+    const last7Plans = data.plans.slice(0, 7);
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">☀️</span>Daily Negotiator</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value">${completedToday}/${totalToday}</div><div class="expanded-stat-label">Today's Tasks</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-danger);">${hardTasks.length}</div><div class="expanded-stat-label">Hard Things</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-success);">${rewards.length}</div><div class="expanded-stat-label">Rewards</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${data.plans.length}</div><div class="expanded-stat-label">Days Planned</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <button class="btn btn-primary" id="dn-exp-plan">☀️ ${todayPlan ? 'Edit' : 'Start'} Today's Plan</button>
+        </div>
+
+        ${todayPlan ? `
+          <div class="expanded-grid-2" style="margin-bottom: 24px;">
+            <div class="expanded-section">
+              <div class="expanded-section-title"><span>🎯</span> Ideal Day Vision</div>
+              <div style="padding: 16px; background: var(--glass-bg); border-radius: 12px; font-style: italic; color: var(--text-secondary);">
+                "${todayPlan.idealDay || 'Not set'}"
+              </div>
+            </div>
+            <div class="expanded-section">
+              <div class="expanded-section-title"><span>📊</span> Today's Progress</div>
+              <div class="progress-bar" style="height: 20px; margin-bottom: 12px;">
+                <div class="progress-fill success" style="width: ${totalToday > 0 ? (completedToday / totalToday) * 100 : 0}%;"></div>
+              </div>
+              <div style="text-align: center; font-size: 24px; font-weight: 700; color: var(--accent-success);">${totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0}%</div>
+            </div>
+          </div>
+
+          <div class="expanded-section" style="margin-bottom: 24px;">
+            <div class="expanded-section-title"><span>📋</span> Today's Tasks (${totalToday})</div>
+            <ul class="item-list expanded-list">
+              ${todayPlan.tasks.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No tasks planned</li>' : todayPlan.tasks.map(task => `
+                <li data-id="${task.id}" style="${task.completed ? 'opacity: 0.6;' : ''}">
+                  <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} class="dn-exp-checkbox">
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="${task.completed ? 'text-decoration: line-through;' : ''}">${task.text}</div>
+                      <div style="display: flex; gap: 8px; margin-top: 4px;">
+                        ${task.isHard ? '<span class="tag" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">💪 Hard</span>' : ''}
+                        ${task.reward ? '<span class="tag" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">🎁 Reward</span>' : ''}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : `
+          <div class="expanded-section" style="text-align: center; padding: 60px;">
+            <div style="font-size: 64px; margin-bottom: 16px;">☀️</div>
+            <div style="font-size: 18px; color: var(--text-muted);">No plan for today yet</div>
+            <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">Click "Start Today's Plan" to negotiate with yourself</div>
+          </div>
+        `}
+
+        <div class="expanded-section">
+          <div class="expanded-section-title"><span>📈</span> Recent Days</div>
+          <div style="display: flex; gap: 12px; overflow-x: auto; padding: 8px 0;">
+            ${last7Plans.map(plan => {
+              const completed = plan.tasks.filter(t => t.completed).length;
+              const total = plan.tasks.length;
+              const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+              return `
+                <div style="flex-shrink: 0; width: 100px; text-align: center; padding: 16px; background: var(--glass-bg); border-radius: 12px;">
+                  <div style="font-size: 11px; color: var(--text-muted);">${new Date(plan.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                  <div style="font-size: 24px; font-weight: 700; color: ${percent >= 80 ? 'var(--accent-success)' : percent >= 50 ? 'var(--accent-warning)' : 'var(--accent-danger)'};">${percent}%</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">${completed}/${total} tasks</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const planBtn = container.querySelector('#dn-exp-plan');
+    if (planBtn) planBtn.onclick = () => this.showPlanModal();
+
+    container.querySelectorAll('.dn-exp-checkbox').forEach(cb => {
+      cb.onchange = async (e) => {
+        const li = e.target.closest('li');
+        if (li) { await this.toggleTask(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('dailyNegotiator')) this.renderExpanded(); }
+      };
+    });
   }
 };
 

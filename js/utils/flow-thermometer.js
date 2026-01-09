@@ -263,6 +263,82 @@ const FlowThermometer = {
     });
   },
 
+  /**
+   * Render expanded view with flow analytics
+   */
+  async renderExpanded() {
+    const container = document.getElementById('flow-thermometer-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const stats = this.getStateStats(data.readings);
+    const lastReading = data.readings[0];
+    const isPaused = data.paused && data.pausedUntil && new Date(data.pausedUntil) > new Date();
+
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(); date.setDate(date.getDate() - i);
+      const dateKey = date.toLocaleDateString();
+      const dayReadings = data.readings.filter(r => new Date(r.timestamp).toLocaleDateString() === dateKey);
+      const flowCount = dayReadings.filter(r => r.state === 'flow').length;
+      last7Days.push({ date: date.toLocaleDateString('en-US', { weekday: 'short' }), percent: dayReadings.length > 0 ? Math.round((flowCount / dayReadings.length) * 100) : 0 });
+    }
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">🌡️</span>Flow Thermometer</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-success);">${stats.flow}%</div><div class="expanded-stat-label">Flow</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-danger);">${stats.anxiety}%</div><div class="expanded-stat-label">Anxiety</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-warning);">${stats.boredom}%</div><div class="expanded-stat-label">Boredom</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${stats.total}</div><div class="expanded-stat-label">Check-ins</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="ft-exp-checkin">🌡️ Check Flow State</button>
+          ${isPaused ? '<button class="btn btn-secondary" id="ft-exp-resume">▶️ Resume</button>' : '<button class="btn btn-secondary" id="ft-exp-pause-30">⏸️ Pause 30m</button><button class="btn btn-secondary" id="ft-exp-pause-60">⏸️ Pause 1h</button>'}
+        </div>
+
+        ${isPaused ? `<div style="background: rgba(59, 130, 246, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;"><p style="font-size: 14px; color: var(--accent-info);">⏸️ Paused until ${new Date(data.pausedUntil).toLocaleTimeString()}</p></div>` : ''}
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📊</span> Current State</div>
+            ${lastReading ? `<div style="text-align: center; padding: 30px; background: ${lastReading.state === 'flow' ? 'rgba(16, 185, 129, 0.15)' : lastReading.state === 'anxiety' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)'}; border-radius: 12px;"><div style="font-size: 64px; margin-bottom: 12px;">${lastReading.state === 'flow' ? '🎯' : lastReading.state === 'anxiety' ? '😰' : '😴'}</div><div style="font-size: 24px; font-weight: 700; color: ${lastReading.state === 'flow' ? 'var(--accent-success)' : lastReading.state === 'anxiety' ? 'var(--accent-danger)' : 'var(--accent-warning)'}; text-transform: capitalize;">${lastReading.state === 'flow' ? 'In Flow!' : lastReading.state}</div><div style="font-size: 14px; color: var(--text-secondary);">Difficulty: ${lastReading.difficulty}/10 • Skill: ${lastReading.skill}/10</div><div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">${data.suggestions[lastReading.state]}</div></div>` : '<div style="text-align: center; padding: 40px;"><div style="font-size: 48px; margin-bottom: 16px;">🌡️</div><div style="color: var(--text-muted);">No readings yet</div></div>'}
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📈</span> Last 7 Days</div>
+            <div style="display: flex; align-items: flex-end; gap: 8px; height: 150px; padding: 10px 0;">
+              ${last7Days.map(day => `<div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;"><div style="flex: 1; display: flex; align-items: flex-end; width: 100%;"><div style="width: 100%; height: ${day.percent}%; background: var(--accent-success); border-radius: 4px 4px 0 0; min-height: 4px;"></div></div><div style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">${day.date}</div><div style="font-size: 10px; color: var(--accent-success);">${day.percent}%</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title"><span>📋</span> Recent Check-ins</div>
+          <ul class="item-list expanded-list" style="max-height: 300px;">
+            ${data.readings.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No check-ins yet</li>' : data.readings.slice(0, 30).map(r => `<li><div style="display: flex; align-items: center; gap: 12px; flex: 1;"><span style="font-size: 24px;">${r.state === 'flow' ? '🎯' : r.state === 'anxiety' ? '😰' : '😴'}</span><div style="flex: 1;"><div style="font-weight: 600; text-transform: capitalize; color: ${r.state === 'flow' ? 'var(--accent-success)' : r.state === 'anxiety' ? 'var(--accent-danger)' : 'var(--accent-warning)'};">${r.state}</div><div style="font-size: 11px; color: var(--text-muted);">D: ${r.difficulty} • S: ${r.skill}</div></div></div><div style="font-size: 11px; color: var(--text-muted);">${new Date(r.timestamp).toLocaleDateString()} ${new Date(r.timestamp).toLocaleTimeString()}</div></li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+
+    const checkinBtn = container.querySelector('#ft-exp-checkin');
+    if (checkinBtn) checkinBtn.onclick = () => this.showCheckinModal();
+
+    const resumeBtn = container.querySelector('#ft-exp-resume');
+    if (resumeBtn) resumeBtn.onclick = async () => { await this.resume(); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('flowThermometer')) this.renderExpanded(); };
+
+    const pause30 = container.querySelector('#ft-exp-pause-30');
+    if (pause30) pause30.onclick = async () => { await this.pauseFor(30); window.showToast?.('Paused 30m', 'info'); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('flowThermometer')) this.renderExpanded(); };
+
+    const pause60 = container.querySelector('#ft-exp-pause-60');
+    if (pause60) pause60.onclick = async () => { await this.pauseFor(60); window.showToast?.('Paused 1h', 'info'); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('flowThermometer')) this.renderExpanded(); };
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,timestamp,difficulty,skill,state\n';
