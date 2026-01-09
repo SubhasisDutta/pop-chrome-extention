@@ -1,0 +1,181 @@
+/* POP Popup Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  width: 320px;
+  background: linear-gradient(135deg, #ff9ebc 0%, #ffb7ce 100%);
+  color: white;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.quick-capture {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.quick-capture input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-size: 14px;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.quick-capture input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.quick-capture input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.tag-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag-btn.actionable {
+  background: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+.tag-btn.actionable:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+.tag-btn.reference {
+  background: rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+}
+
+.tag-btn.reference:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+.menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.menu-item {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.menu-item-icon {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.menu-item-label {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.open-dashboard {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.2s ease;
+}
+
+.open-dashboard:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hotkey {
+  font-size: 9px;
+  opacity: 0.6;
+  margin-top: 2px;
+  font-family: monospace;
+}
+
+.toast {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+}

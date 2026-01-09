@@ -178,7 +178,7 @@ const StockWatchlist = {
       <div class="modal" style="max-width: 400px;">
         <div class="modal-header">
           <h2 class="modal-title">📊 New Watchlist</h2>
-          <button class="modal-close" onclick="document.getElementById('sw-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="sw-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">Watchlist Name</label>
@@ -188,6 +188,10 @@ const StockWatchlist = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="sw-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#sw-create-btn').addEventListener('click', async () => {
       const name = modal.querySelector('#sw-name').value.trim();
@@ -217,7 +221,7 @@ const StockWatchlist = {
       <div class="modal" style="max-width: 400px;">
         <div class="modal-header">
           <h2 class="modal-title">📈 Add Stock</h2>
-          <button class="modal-close" onclick="document.getElementById('sw-stock-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="sw-stock-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">Stock Symbol</label>
@@ -247,6 +251,10 @@ const StockWatchlist = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="sw-stock-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#sw-add-stock-btn').addEventListener('click', async () => {
       const symbol = modal.querySelector('#sw-symbol').value.trim().toUpperCase();

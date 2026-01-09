@@ -173,7 +173,7 @@ const WeeklyReview = {
       <div class="modal" style="max-width: 600px;">
         <div class="modal-header">
           <h2 class="modal-title">📋 Weekly Review</h2>
-          <button class="modal-close" onclick="document.getElementById('wr-review-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="wr-review-modal">&times;</button>
         </div>
         <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
           Take 15 minutes to reflect on your week. Answer each question thoughtfully.
@@ -191,6 +191,11 @@ const WeeklyReview = {
       </div>
     `;
     document.body.appendChild(modal);
+
+    // Add close button listener
+    modal.querySelector('[data-dismiss="wr-review-modal"]').addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#wr-save-review').addEventListener('click', async () => {
       const responses = {};
@@ -245,7 +250,7 @@ const WeeklyReview = {
       <div class="modal" style="max-width: 600px;">
         <div class="modal-header">
           <h2 class="modal-title">📋 Review from ${new Date(lastReview.date).toLocaleDateString()}</h2>
-          <button class="modal-close" onclick="document.getElementById('wr-last-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="wr-last-modal">&times;</button>
         </div>
         ${Object.entries(lastReview.responses).map(([q, a]) => `
           <div style="margin-bottom: 16px;">
@@ -258,6 +263,11 @@ const WeeklyReview = {
       </div>
     `;
     document.body.appendChild(modal);
+
+    // Add close button listener
+    modal.querySelector('[data-dismiss="wr-last-modal"]').addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
@@ -275,7 +285,7 @@ const WeeklyReview = {
       <div class="modal" style="max-width: 400px;">
         <div class="modal-header">
           <h2 class="modal-title">⚙️ Review Settings</h2>
-          <button class="modal-close" onclick="document.getElementById('wr-settings-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="wr-settings-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">Review Day</label>
@@ -298,6 +308,11 @@ const WeeklyReview = {
       </div>
     `;
     document.body.appendChild(modal);
+
+    // Add close button listener
+    modal.querySelector('[data-dismiss="wr-settings-modal"]').addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#wr-save-settings').addEventListener('click', async () => {
       const day = parseInt(modal.querySelector('#wr-day').value);

@@ -126,7 +126,7 @@ const NetWorth = {
       <div class="modal" style="max-width: 500px;">
         <div class="modal-header">
           <h2 class="modal-title">📈 Update Net Worth</h2>
-          <button class="modal-close" onclick="document.getElementById('nw-add-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="nw-add-modal">&times;</button>
         </div>
         <h4 style="color: var(--accent-success); margin-bottom: 12px;">Assets</h4>
         <div class="input-group">
@@ -166,6 +166,10 @@ const NetWorth = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="nw-add-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#nw-save-btn').addEventListener('click', async () => {
       const entry = {

@@ -150,7 +150,7 @@ const PurposeGatekeeper = {
       <div class="modal" style="max-width: 450px;">
         <div class="modal-header">
           <h2 class="modal-title">🎯 Add Task with Purpose</h2>
-          <button class="modal-close" onclick="document.getElementById('pg-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="pg-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">What do you want to do?</label>
@@ -200,6 +200,10 @@ const PurposeGatekeeper = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="pg-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     const purposeSelect = modal.querySelector('#pg-purpose');
     const newPurposeFields = modal.querySelector('#pg-new-purpose-fields');

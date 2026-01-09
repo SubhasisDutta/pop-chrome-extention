@@ -219,7 +219,7 @@ const DigitalCleaner = {
       <div class="modal" style="max-width: 500px;">
         <div class="modal-header">
           <h2 class="modal-title">📁 Archived Bookmarks</h2>
-          <button class="modal-close" onclick="document.getElementById('dc-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="dc-modal">&times;</button>
         </div>
         <ul class="item-list" style="max-height: 400px;">
           ${data.archivedBookmarks.length === 0 ? `
@@ -241,6 +241,10 @@ const DigitalCleaner = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="dc-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();

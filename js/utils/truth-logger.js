@@ -161,7 +161,7 @@ const TruthLogger = {
       <div class="modal" style="max-width: 350px;">
         <div class="modal-header">
           <h2 class="modal-title">${category === 'deep' ? '🎯 Log Deep Work' : '📧 Log Shallow Work'}</h2>
-          <button class="modal-close" onclick="document.getElementById('tl-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="tl-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">How many minutes?</label>
@@ -179,6 +179,10 @@ const TruthLogger = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="tl-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     let selectedMinutes = 0;
 
@@ -218,7 +222,7 @@ const TruthLogger = {
       <div class="modal" style="max-width: 400px;">
         <div class="modal-header">
           <h2 class="modal-title">🏷️ Categorize Site</h2>
-          <button class="modal-close" onclick="document.getElementById('tl-site-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="tl-site-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">Website domain</label>
@@ -243,6 +247,10 @@ const TruthLogger = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="tl-site-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelectorAll('label:has(input[name="tl-cat"])').forEach(label => {
       label.addEventListener('click', () => {

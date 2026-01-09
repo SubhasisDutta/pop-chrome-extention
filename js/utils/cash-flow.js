@@ -149,7 +149,7 @@ const CashFlow = {
       <div class="modal">
         <div class="modal-header">
           <h2 class="modal-title">💰 Add Transaction</h2>
-          <button class="modal-close" onclick="document.getElementById('cf-add-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="cf-add-modal">&times;</button>
         </div>
         <div class="nav-tabs" style="margin-bottom: 16px;">
           <button class="nav-tab active" data-type="expense">💸 Expense</button>
@@ -177,6 +177,11 @@ const CashFlow = {
       </div>
     `;
     document.body.appendChild(modal);
+
+    // Add close button listener
+    modal.querySelector('[data-dismiss="cf-add-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     let currentType = 'expense';
 

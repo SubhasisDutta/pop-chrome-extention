@@ -172,7 +172,7 @@ const QuestionPrimer = {
       <div class="modal" style="max-width: 500px;">
         <div class="modal-header">
           <h2 class="modal-title">❓ Set Core Question</h2>
-          <button class="modal-close" onclick="document.getElementById('qp-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="qp-modal">&times;</button>
         </div>
         <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
           Before diving into deep work, clarify what you're trying to answer. This focuses your efforts.
@@ -192,6 +192,10 @@ const QuestionPrimer = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="qp-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#qp-save-btn').addEventListener('click', async () => {
       const question = modal.querySelector('#qp-question').value.trim();

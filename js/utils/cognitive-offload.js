@@ -208,7 +208,7 @@ const CognitiveOffload = {
       <div class="modal" style="max-width: 600px;">
         <div class="modal-header">
           <h2 class="modal-title">💡 All Thoughts</h2>
-          <button class="modal-close" onclick="document.getElementById('co-all-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="co-all-modal">&times;</button>
         </div>
         <div class="nav-tabs" style="margin-bottom: 16px;">
           <button class="nav-tab active" data-filter="all">All (${data.thoughts.length})</button>
@@ -239,6 +239,10 @@ const CognitiveOffload = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="co-all-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     // Filter tabs
     modal.querySelectorAll('.nav-tab').forEach(tab => {

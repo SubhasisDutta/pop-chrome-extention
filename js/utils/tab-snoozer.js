@@ -186,7 +186,7 @@ const TabSnoozer = {
       <div class="modal" style="max-width: 400px;">
         <div class="modal-header">
           <h2 class="modal-title">😴 Snooze Tab</h2>
-          <button class="modal-close" onclick="document.getElementById('ts-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="ts-modal">&times;</button>
         </div>
         <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; padding: 12px; background: var(--glass-bg); border-radius: 10px;">
           <strong>GTD Decision:</strong> Will this take less than 2 minutes?
@@ -230,6 +230,10 @@ const TabSnoozer = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="ts-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     let selectedHours = 24;
 

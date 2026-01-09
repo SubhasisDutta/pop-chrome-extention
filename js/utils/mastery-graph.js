@@ -166,7 +166,7 @@ const MasteryGraph = {
       <div class="modal" style="max-width: 350px;">
         <div class="modal-header">
           <h2 class="modal-title">📈 Log Progress</h2>
-          <button class="modal-close" onclick="document.getElementById('mg-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="mg-modal">&times;</button>
         </div>
         <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; text-align: center;">
           Compare yourself to who you were yesterday, not to who someone else is today.
@@ -179,6 +179,10 @@ const MasteryGraph = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="mg-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#mg-save-btn').addEventListener('click', async () => {
       const value = parseInt(modal.querySelector('#mg-value').value) || 0;
@@ -202,7 +206,7 @@ const MasteryGraph = {
       <div class="modal" style="max-width: 350px;">
         <div class="modal-header">
           <h2 class="modal-title">📊 Change Metric</h2>
-          <button class="modal-close" onclick="document.getElementById('mg-metric-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="mg-metric-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">What are you tracking?</label>
@@ -230,6 +234,10 @@ const MasteryGraph = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="mg-metric-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelectorAll('.mg-preset').forEach(btn => {
       btn.addEventListener('click', () => {

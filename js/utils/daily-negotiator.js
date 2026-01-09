@@ -205,7 +205,7 @@ const DailyNegotiator = {
       <div class="modal" style="max-width: 500px;">
         <div class="modal-header">
           <h2 class="modal-title">☀️ Plan Your Day</h2>
-          <button class="modal-close" onclick="document.getElementById('dn-plan-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="dn-plan-modal">&times;</button>
         </div>
         <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">
           Treat yourself like someone you are responsible for helping. What would make today meaningful?
@@ -218,6 +218,10 @@ const DailyNegotiator = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="dn-plan-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#dn-create-plan').addEventListener('click', async () => {
       const idealDay = modal.querySelector('#dn-ideal-day').value.trim() || 'A meaningful and productive day';
@@ -244,7 +248,7 @@ const DailyNegotiator = {
       <div class="modal" style="max-width: 450px;">
         <div class="modal-header">
           <h2 class="modal-title">📝 Add Task</h2>
-          <button class="modal-close" onclick="document.getElementById('dn-task-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="dn-task-modal">&times;</button>
         </div>
         ${needsReward ? `
           <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
@@ -281,6 +285,10 @@ const DailyNegotiator = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="dn-task-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     // Type selection styling
     modal.querySelectorAll('.dn-type-option').forEach(opt => {

@@ -190,7 +190,7 @@ const FlowThermometer = {
       <div class="modal" style="max-width: 400px;">
         <div class="modal-header">
           <h2 class="modal-title">🌡️ Flow Check-in</h2>
-          <button class="modal-close" onclick="document.getElementById('ft-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="ft-modal">&times;</button>
         </div>
         <div class="input-group">
           <label class="input-label">Task Difficulty: <span id="ft-diff-val">5</span>/10</label>
@@ -216,6 +216,10 @@ const FlowThermometer = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="ft-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     const diffSlider = modal.querySelector('#ft-difficulty');
     const skillSlider = modal.querySelector('#ft-skill');

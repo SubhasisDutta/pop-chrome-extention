@@ -238,7 +238,7 @@ const LifeCalculator = {
       <div class="modal" style="max-width: 450px;">
         <div class="modal-header">
           <h2 class="modal-title">⏳ Life Calculator Setup</h2>
-          <button class="modal-close" onclick="document.getElementById('lc-setup-modal').remove()">&times;</button>
+          <button class="modal-close" data-dismiss="lc-setup-modal">&times;</button>
         </div>
         <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
           Enter your information to calculate your remaining time and financial freedom metrics.
@@ -272,6 +272,10 @@ const LifeCalculator = {
       </div>
     `;
     document.body.appendChild(modal);
+    // Add close button listener
+    modal.querySelector('[data-dismiss="lc-setup-modal"]')?.addEventListener('click', () => {
+      modal.remove();
+    });
 
     modal.querySelector('#lc-save-setup').addEventListener('click', async () => {
       const dob = modal.querySelector('#lc-dob').value;
