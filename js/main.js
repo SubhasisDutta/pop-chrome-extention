@@ -350,6 +350,34 @@ function handleHashNavigation() {
   }
 }
 
+// Setup hotkeys for utilities that have them
+function setupUtilityHotkeys() {
+  const isMac = /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent);
+
+  // Only these utilities have actual shortcuts in manifest.json
+  const shortcuts = {
+    'bubble-cognitive-offload': isMac ? 'MacCtrl+C' : 'Alt+C',
+    'bubble-daily-negotiator': isMac ? 'MacCtrl+D' : 'Alt+D',
+    'bubble-truth-logger': isMac ? 'MacCtrl+T' : 'Alt+T'
+  };
+
+  Object.entries(shortcuts).forEach(([bubbleId, shortcut]) => {
+    const bubble = document.getElementById(bubbleId);
+    if (bubble) {
+      const bubbleName = bubble.querySelector('.bubble-name');
+      if (bubbleName && bubbleName.parentElement) {
+        // Check if hotkey span doesn't already exist
+        if (!bubbleName.parentElement.querySelector('.bubble-hotkey')) {
+          const hotkeySpan = document.createElement('span');
+          hotkeySpan.className = 'bubble-hotkey';
+          hotkeySpan.textContent = shortcut;
+          bubbleName.parentElement.appendChild(hotkeySpan);
+        }
+      }
+    }
+  });
+}
+
 // Initialize everything
 async function init() {
   console.log('Initializing POP Dashboard...');
@@ -365,6 +393,9 @@ async function init() {
 
   // Setup theme toggle
   setupThemeToggle();
+
+  // Setup utility hotkeys
+  setupUtilityHotkeys();
 
   // Handle hash navigation
   handleHashNavigation();
