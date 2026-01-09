@@ -280,6 +280,123 @@ const StockWatchlist = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with all watchlists
+   */
+  async renderExpanded() {
+    const container = document.getElementById('stock-watchlist-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const totalStocks = data.watchlists.reduce((sum, w) => sum + w.stocks.length, 0);
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title">
+            <span class="expanded-title-icon">📊</span>
+            Stock Watchlist
+          </div>
+          <div class="expanded-stats">
+            <div class="expanded-stat">
+              <div class="expanded-stat-value">${data.watchlists.length}</div>
+              <div class="expanded-stat-label">Watchlists</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value">${totalStocks}</div>
+              <div class="expanded-stat-label">Total Stocks</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="sw-expanded-add-list">+ New Watchlist</button>
+          <button class="btn btn-secondary" id="sw-expanded-add-stock">+ Add Stock</button>
+        </div>
+
+        <div class="expanded-grid-3">
+          ${data.watchlists.length === 0 ? `
+            <div class="expanded-section" style="grid-column: span 3; text-align: center; padding: 60px;">
+              <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+              <div style="font-size: 16px; color: var(--text-muted);">No watchlists yet. Create one to start tracking stocks!</div>
+            </div>
+          ` : data.watchlists.map(watchlist => `
+            <div class="expanded-section">
+              <div class="expanded-section-title">
+                <span>📋</span> ${this.escapeHtml(watchlist.name)} (${watchlist.stocks.length})
+              </div>
+              <ul class="item-list" style="max-height: 350px;">
+                ${watchlist.stocks.length === 0 ? `
+                  <li style="justify-content: center; color: var(--text-muted);">No stocks in this list</li>
+                ` : watchlist.stocks.map(stock => `
+                  <li data-symbol="${stock.symbol}" data-list="${watchlist.id}">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; font-size: 16px;">${stock.symbol}</div>
+                      <div style="font-size: 11px; color: var(--text-muted);">${stock.exchange || 'NASDAQ'}</div>
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                      <a href="https://finance.yahoo.com/quote/${stock.symbol}" target="_blank" class="btn btn-sm btn-secondary" title="Yahoo Finance" style="padding: 6px;">📈</a>
+                      <a href="https://www.tradingview.com/symbols/${stock.exchange || 'NASDAQ'}-${stock.symbol}/" target="_blank" class="btn btn-sm btn-secondary" title="TradingView" style="padding: 6px;">📊</a>
+                      <a href="https://www.google.com/finance/quote/${stock.symbol}:${stock.exchange || 'NASDAQ'}" target="_blank" class="btn btn-sm btn-secondary" title="Google Finance" style="padding: 6px;">🔍</a>
+                    </div>
+                  </li>
+                `).join('')}
+              </ul>
+              <div style="margin-top: 12px;">
+                <button class="btn btn-sm btn-secondary sw-exp-add-to-list" data-list="${watchlist.id}" style="width: 100%;">+ Add Stock to ${this.escapeHtml(watchlist.name)}</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="expanded-section" style="margin-top: 24px;">
+          <div class="expanded-section-title">
+            <span>🔗</span> Quick Research Links
+          </div>
+          <div class="expanded-grid-4">
+            <a href="https://finance.yahoo.com/markets/" target="_blank" class="stat-card-large" style="text-decoration: none; cursor: pointer;">
+              <div class="stat-icon">📈</div>
+              <div style="font-size: 14px; font-weight: 600;">Yahoo Finance</div>
+              <div class="stat-label">Market Overview</div>
+            </a>
+            <a href="https://www.tradingview.com/markets/" target="_blank" class="stat-card-large" style="text-decoration: none; cursor: pointer;">
+              <div class="stat-icon">📊</div>
+              <div style="font-size: 14px; font-weight: 600;">TradingView</div>
+              <div class="stat-label">Charts & Analysis</div>
+            </a>
+            <a href="https://finviz.com/screener.ashx" target="_blank" class="stat-card-large" style="text-decoration: none; cursor: pointer;">
+              <div class="stat-icon">🔎</div>
+              <div style="font-size: 14px; font-weight: 600;">Finviz</div>
+              <div class="stat-label">Stock Screener</div>
+            </a>
+            <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent" target="_blank" class="stat-card-large" style="text-decoration: none; cursor: pointer;">
+              <div class="stat-icon">📄</div>
+              <div style="font-size: 14px; font-weight: 600;">SEC EDGAR</div>
+              <div class="stat-label">Company Filings</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Bind buttons
+    const addListBtn = container.querySelector('#sw-expanded-add-list');
+    const addStockBtn = container.querySelector('#sw-expanded-add-stock');
+    if (addListBtn) addListBtn.onclick = () => this.showAddWatchlistModal();
+    if (addStockBtn) addStockBtn.onclick = () => this.showAddStockModal();
+
+    container.querySelectorAll('.sw-exp-add-to-list').forEach(btn => {
+      btn.onclick = () => {
+        this.showAddStockModal();
+        // Pre-select the watchlist in modal after it opens
+        setTimeout(() => {
+          const select = document.querySelector('#sw-watchlist');
+          if (select) select.value = btn.dataset.list;
+        }, 100);
+      };
+    });
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'watchlistId,watchlistName,symbol,name,exchange,addedAt\n';

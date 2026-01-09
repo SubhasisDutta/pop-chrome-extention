@@ -292,6 +292,60 @@ const TabSnoozer = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with full snooze management
+   */
+  async renderExpanded() {
+    const container = document.getElementById('tab-snoozer-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const activeTabs = data.snoozedTabs.filter(t => new Date(t.wakeAt) > new Date());
+    const expiredTabs = data.snoozedTabs.filter(t => new Date(t.wakeAt) <= new Date());
+    const nextWake = activeTabs.length > 0 ? activeTabs.sort((a, b) => new Date(a.wakeAt) - new Date(b.wakeAt))[0] : null;
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">😴</span>Tab Snoozer</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value">${activeTabs.length}</div><div class="expanded-stat-label">Snoozed</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-success);">${expiredTabs.length}</div><div class="expanded-stat-label">Ready</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${data.snoozedTabs.length}</div><div class="expanded-stat-label">Total</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <button class="btn btn-primary" id="ts-exp-snooze">😴 Snooze Current Tab</button>
+        </div>
+
+        ${nextWake ? `<div style="background: rgba(59, 130, 246, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 24px;"><div style="font-size: 12px; color: var(--text-muted);">Next wake up</div><div style="font-size: 16px; font-weight: 600;">${this.escapeHtml(nextWake.title || 'Untitled')}</div><div style="font-size: 14px; color: var(--accent-info);">⏰ ${new Date(nextWake.wakeAt).toLocaleString()}</div></div>` : ''}
+
+        <div class="expanded-grid-2">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>😴</span> Snoozed (${activeTabs.length})</div>
+            <ul class="item-list expanded-list">
+              ${activeTabs.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No tabs snoozed</li>' : activeTabs.map(tab => `<li data-id="${tab.id}"><div style="flex: 1; min-width: 0;"><div style="font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.escapeHtml(tab.title || 'Untitled')}</div><div style="font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.escapeHtml(tab.url)}</div><div style="font-size: 11px; color: var(--accent-info);">⏰ ${new Date(tab.wakeAt).toLocaleString()}</div></div><div style="display: flex; gap: 4px;"><button class="btn btn-sm btn-secondary ts-exp-wake" title="Wake now">▶️</button><button class="btn btn-sm btn-secondary ts-exp-delete" style="opacity: 0.5;" title="Delete">×</button></div></li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title" style="color: var(--accent-success);"><span>✅</span> Ready to Open (${expiredTabs.length})</div>
+            <ul class="item-list expanded-list">
+              ${expiredTabs.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No tabs ready</li>' : expiredTabs.map(tab => `<li data-id="${tab.id}"><div style="flex: 1; min-width: 0;"><div style="font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.escapeHtml(tab.title || 'Untitled')}</div><div style="font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.escapeHtml(tab.url)}</div></div><div style="display: flex; gap: 4px;"><button class="btn btn-sm btn-primary ts-exp-wake" title="Open">▶️</button><button class="btn btn-sm btn-secondary ts-exp-delete" style="opacity: 0.5;">×</button></div></li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const snoozeBtn = container.querySelector('#ts-exp-snooze');
+    if (snoozeBtn) snoozeBtn.onclick = () => this.showSnoozeModal();
+
+    container.querySelectorAll('.ts-exp-wake').forEach(btn => { btn.onclick = async (e) => { const li = e.target.closest('li'); if (li) { await this.wakeTab(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('tabSnoozer')) this.renderExpanded(); } }; });
+    container.querySelectorAll('.ts-exp-delete').forEach(btn => { btn.onclick = async (e) => { const li = e.target.closest('li'); if (li) { await this.deleteTab(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('tabSnoozer')) this.renderExpanded(); } }; });
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,url,title,snoozedAt,wakeAt\n';

@@ -257,6 +257,126 @@ const DigitalCleaner = {
     return div.innerHTML;
   },
 
+  async renderExpanded(container) {
+    const data = await this.getData();
+    const allOldBookmarks = await this.getOldBookmarks(50);
+
+    const totalProcessed = data.processedBookmarks.length;
+    const totalArchived = data.archivedBookmarks.length;
+    const pendingCount = allOldBookmarks.length;
+
+    container.innerHTML = `
+      <div class="expanded-header">
+        <div class="expanded-header-content">
+          <span class="expanded-icon">🧹</span>
+          <div>
+            <h2 class="expanded-title">Digital Room Cleaner</h2>
+            <p class="expanded-subtitle">Clean old bookmarks and reduce digital clutter</p>
+          </div>
+        </div>
+        <div class="expanded-header-stats">
+          <div class="expanded-stat">
+            <span class="expanded-stat-value">${pendingCount}</span>
+            <span class="expanded-stat-label">Pending Review</span>
+          </div>
+          <div class="expanded-stat">
+            <span class="expanded-stat-value">${totalArchived}</span>
+            <span class="expanded-stat-label">Archived</span>
+          </div>
+          <div class="expanded-stat">
+            <span class="expanded-stat-value">${totalProcessed}</span>
+            <span class="expanded-stat-label">Processed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="expanded-grid-2">
+        <div class="expanded-section">
+          <div class="expanded-section-header">
+            <h3>📋 Old Bookmarks to Review (6+ months)</h3>
+            ${allOldBookmarks.length > 0 ? `
+              <button class="btn btn-sm dc-archive-all" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                📁 Archive All
+              </button>
+            ` : ''}
+          </div>
+          <div style="max-height: 500px; overflow-y: auto;">
+            ${allOldBookmarks.length === 0 ? `
+              <div style="text-align: center; padding: 40px; background: rgba(16, 185, 129, 0.1); border-radius: 12px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">✨</div>
+                <div style="font-size: 18px; font-weight: 600; color: var(--accent-success);">All Clean!</div>
+                <div style="font-size: 14px; color: var(--text-muted); margin-top: 8px;">No old bookmarks to review</div>
+              </div>
+            ` : allOldBookmarks.map(bm => `
+              <div class="glass-card-flat" style="padding: 14px; margin-bottom: 10px;" data-id="${bm.id}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      ${this.escapeHtml(bm.title || 'Untitled')}
+                    </div>
+                    <a href="${bm.url}" target="_blank" style="font-size: 12px; color: var(--accent-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                      ${this.escapeHtml(bm.url)}
+                    </a>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-left: 12px; white-space: nowrap;">
+                    📅 ${this.formatDate(bm.dateAdded)}
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-sm dc-archive" data-bookmark='${JSON.stringify(bm).replace(/'/g, "&#39;")}' style="flex: 1; background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                    📁 Archive
+                  </button>
+                  <button class="btn btn-sm dc-delete" data-bookmark='${JSON.stringify(bm).replace(/'/g, "&#39;")}' style="flex: 1; background: rgba(239, 68, 68, 0.2); color: #f87171;">
+                    🗑️ Delete
+                  </button>
+                  <button class="btn btn-sm btn-secondary dc-skip" data-id="${bm.id}" style="padding: 8px 12px;">
+                    ⏭️ Skip
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-header">
+            <h3>📁 Archived Bookmarks</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">${totalArchived} total</span>
+          </div>
+          <div style="max-height: 500px; overflow-y: auto;">
+            ${data.archivedBookmarks.length === 0 ? `
+              <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <div style="font-size: 32px; margin-bottom: 12px;">📂</div>
+                <div>No archived bookmarks yet</div>
+              </div>
+            ` : data.archivedBookmarks.slice().reverse().map(bm => `
+              <div class="glass-card-flat" style="padding: 12px; margin-bottom: 8px;">
+                <div style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px;">
+                  ${this.escapeHtml(bm.title || 'Untitled')}
+                </div>
+                <a href="${bm.url}" target="_blank" style="font-size: 11px; color: var(--accent-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; margin-bottom: 4px;">
+                  ${this.escapeHtml(bm.url)}
+                </a>
+                <div style="font-size: 10px; color: var(--text-muted);">
+                  Archived ${new Date(bm.archivedAt).toLocaleDateString()}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Bind archive all button
+    container.querySelector('.dc-archive-all')?.addEventListener('click', async () => {
+      for (const bm of allOldBookmarks) {
+        await this.archiveBookmark(bm);
+      }
+      window.showToast?.('All bookmarks archived', 'success');
+      this.renderExpanded(container);
+    });
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,title,url,dateAdded,archivedAt\n';

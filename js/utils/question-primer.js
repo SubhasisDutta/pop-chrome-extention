@@ -222,6 +222,74 @@ const QuestionPrimer = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with all questions
+   */
+  async renderExpanded() {
+    const container = document.getElementById('question-primer-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const activeQuestions = data.questions.filter(q => !q.resolved);
+    const resolvedQuestions = data.questions.filter(q => q.resolved);
+    const stuckQuestions = this.findStuckQuestions(data.questions);
+
+    const questionsBySite = {};
+    activeQuestions.forEach(q => { if (!questionsBySite[q.site]) questionsBySite[q.site] = []; questionsBySite[q.site].push(q); });
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">❓</span>Question Primer</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value">${activeQuestions.length}</div><div class="expanded-stat-label">Active</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: ${stuckQuestions.length > 0 ? 'var(--accent-warning)' : 'var(--accent-success)'};">${stuckQuestions.length}</div><div class="expanded-stat-label">Stuck (3+ days)</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-success);">${resolvedQuestions.length}</div><div class="expanded-stat-label">Resolved</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;"><button class="btn btn-primary" id="qp-expanded-add">+ Set Core Question</button></div>
+
+        ${stuckQuestions.length > 0 ? `<div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;"><div style="font-weight: 600; color: var(--accent-warning); margin-bottom: 8px;">💡 ${stuckQuestions.length} Stuck Question${stuckQuestions.length > 1 ? 's' : ''}</div><div style="font-size: 13px; color: var(--text-secondary);">Consider breaking them into smaller questions or reframing.</div></div>` : ''}
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📝</span> Active Questions (${activeQuestions.length})</div>
+            <ul class="item-list expanded-list">
+              ${activeQuestions.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No active questions</li>' : activeQuestions.map(q => {
+                const isStuck = stuckQuestions.find(sq => sq.id === q.id);
+                return `<li data-id="${q.id}" style="flex-direction: column; align-items: flex-start; gap: 8px;${isStuck ? ' border-left: 3px solid var(--accent-warning);' : ''}"><div style="font-size: 14px; width: 100%;">${this.escapeHtml(q.question)}</div><div style="display: flex; justify-content: space-between; align-items: center; width: 100%;"><div style="font-size: 11px; color: var(--text-muted);">🌐 ${q.site} • ⏱️ ${this.timeAgo(q.askedAt)}</div><div style="display: flex; gap: 4px;"><button class="btn btn-icon btn-sm qp-exp-resolve" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-success);" title="Resolve">✓</button><button class="btn btn-icon btn-sm qp-exp-delete" style="opacity: 0.5;">×</button></div></div></li>`;
+              }).join('')}
+            </ul>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📊</span> By Context</div>
+            ${Object.keys(questionsBySite).length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 40px;">No questions yet</div>' : Object.entries(questionsBySite).map(([site, questions]) => `<div style="margin-bottom: 16px;"><div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span style="font-weight: 600;">🌐 ${site}</span><span class="tag">${questions.length}</span></div><div class="progress-bar"><div class="progress-fill" style="width: ${(questions.length / activeQuestions.length) * 100}%;"></div></div></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title" style="color: var(--accent-success);"><span>✅</span> Recently Resolved (${resolvedQuestions.length})</div>
+          <ul class="item-list expanded-list" style="max-height: 300px;">
+            ${resolvedQuestions.length === 0 ? '<li style="justify-content: center; color: var(--text-muted);">No resolved questions</li>' : resolvedQuestions.slice(0, 20).map(q => `<li style="opacity: 0.7;"><div style="flex: 1; min-width: 0;"><div style="text-decoration: line-through; font-size: 13px;">${this.escapeHtml(q.question)}</div><div style="font-size: 10px; color: var(--text-muted);">Resolved ${this.timeAgo(q.answeredAt)}</div></div></li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+
+    const addBtn = container.querySelector('#qp-expanded-add');
+    if (addBtn) addBtn.onclick = () => this.showAddModal();
+
+    container.querySelectorAll('.qp-exp-resolve').forEach(btn => {
+      btn.onclick = async (e) => { const li = e.target.closest('li'); if (li) { await this.resolveQuestion(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('questionPrimer')) this.renderExpanded(); } };
+    });
+
+    container.querySelectorAll('.qp-exp-delete').forEach(btn => {
+      btn.onclick = async (e) => { const li = e.target.closest('li'); if (li) { await this.deleteQuestion(li.dataset.id); if (typeof ExpandManager !== 'undefined' && ExpandManager.isExpanded('questionPrimer')) this.renderExpanded(); } };
+    });
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,question,site,askedAt,answeredAt,resolved\n';

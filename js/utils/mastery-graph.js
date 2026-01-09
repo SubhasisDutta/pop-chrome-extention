@@ -259,6 +259,86 @@ const MasteryGraph = {
     });
   },
 
+  /**
+   * Render expanded view with full mastery tracking
+   */
+  async renderExpanded() {
+    const container = document.getElementById('mastery-graph-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const today = this.getTodayValue(data.entries);
+    const yesterday = this.getYesterdayValue(data.entries);
+    const diff = today - yesterday;
+    const totalAll = data.entries.reduce((sum, e) => sum + e.value, 0);
+    const avgDaily = data.entries.length > 0 ? Math.round(totalAll / data.entries.length) : 0;
+
+    const last14Days = [];
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date(); date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      const entry = data.entries.find(e => e.date === dateKey);
+      last14Days.push({ date: date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }), value: entry?.value || 0 });
+    }
+    const maxVal = Math.max(...last14Days.map(d => d.value)) || 1;
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">📉</span>${data.metric.name}</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value">${today}</div><div class="expanded-stat-label">Today</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: ${diff >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">${diff >= 0 ? '+' : ''}${diff}</div><div class="expanded-stat-label">vs Yesterday</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${avgDaily}</div><div class="expanded-stat-label">Daily Avg</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${totalAll.toLocaleString()}</div><div class="expanded-stat-label">Total ${data.metric.unit}</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="mg-exp-log">+ Log Today's ${data.metric.name}</button>
+          <button class="btn btn-secondary" id="mg-exp-metric">⚙️ Change Metric</button>
+        </div>
+
+        <div class="expanded-section" style="margin-bottom: 24px;">
+          <div class="expanded-section-title"><span>📊</span> Today vs Yesterday</div>
+          <div style="display: flex; gap: 24px; justify-content: center; padding: 24px;">
+            <div style="text-align: center;">
+              <div style="font-size: 64px; font-weight: 700; color: var(--accent-primary);">${today}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">Today</div>
+            </div>
+            <div style="display: flex; align-items: center; font-size: 40px; color: ${diff >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">
+              ${diff >= 0 ? '↑' : '↓'}
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 64px; font-weight: 700; color: var(--text-muted);">${yesterday}</div>
+              <div style="font-size: 14px; color: var(--text-muted);">Yesterday</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title"><span>📈</span> Last 14 Days</div>
+          <div style="display: flex; align-items: flex-end; gap: 6px; height: 200px; padding: 10px 0;">
+            ${last14Days.map(day => `
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;">
+                <div style="flex: 1; display: flex; align-items: flex-end; width: 100%;">
+                  <div style="width: 100%; height: ${(day.value / maxVal) * 100}%; background: var(--accent-primary); border-radius: 4px 4px 0 0; min-height: 2px;" title="${day.value} ${data.metric.unit}"></div>
+                </div>
+                <div style="font-size: 8px; color: var(--text-muted); margin-top: 4px; transform: rotate(-45deg); white-space: nowrap;">${day.date}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    const logBtn = container.querySelector('#mg-exp-log');
+    if (logBtn) logBtn.onclick = () => this.showLogModal();
+
+    const metricBtn = container.querySelector('#mg-exp-metric');
+    if (metricBtn) metricBtn.onclick = () => this.showMetricModal();
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = `metric,${data.metric.name},${data.metric.unit}\n`;

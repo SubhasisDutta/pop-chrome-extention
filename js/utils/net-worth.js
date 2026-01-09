@@ -197,6 +197,155 @@ const NetWorth = {
     });
   },
 
+  /**
+   * Render expanded view with detailed breakdown
+   */
+  async renderExpanded() {
+    const container = document.getElementById('net-worth-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const latestEntry = data.entries[0];
+    const previousEntry = data.entries[1];
+
+    let change = 0;
+    let changePercent = 0;
+    if (latestEntry && previousEntry) {
+      change = latestEntry.netWorth - previousEntry.netWorth;
+      changePercent = previousEntry.netWorth !== 0
+        ? ((change / previousEntry.netWorth) * 100).toFixed(1)
+        : 0;
+    }
+
+    // Calculate history data for chart
+    const historyData = data.entries.slice(0, 12).reverse();
+    const maxNetWorth = Math.max(...historyData.map(e => Math.abs(e.netWorth))) || 1;
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title">
+            <span class="expanded-title-icon">📈</span>
+            Net Worth Tracker
+          </div>
+          <div class="expanded-stats">
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: ${(latestEntry?.netWorth || 0) >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">$${(latestEntry?.netWorth || 0).toLocaleString()}</div>
+              <div class="expanded-stat-label">Net Worth</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--accent-success);">$${(latestEntry?.totalAssets || 0).toLocaleString()}</div>
+              <div class="expanded-stat-label">Assets</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--accent-danger);">$${(latestEntry?.totalLiabilities || 0).toLocaleString()}</div>
+              <div class="expanded-stat-label">Liabilities</div>
+            </div>
+            ${previousEntry ? `
+              <div class="expanded-stat">
+                <div class="expanded-stat-value" style="color: ${change >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">${change >= 0 ? '+' : ''}$${change.toLocaleString()}</div>
+                <div class="expanded-stat-label">Change (${changePercent}%)</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <button class="btn btn-primary" id="nw-expanded-add">+ Update Net Worth</button>
+        </div>
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title" style="color: var(--accent-success);">
+              <span>💰</span> Asset Breakdown
+            </div>
+            ${!latestEntry ? `
+              <div style="text-align: center; color: var(--text-muted); padding: 40px;">No data yet</div>
+            ` : `
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">🏦</div>
+                  <div class="stat-value" style="font-size: 20px;">$${(latestEntry.assets.cash || 0).toLocaleString()}</div>
+                  <div class="stat-label">Cash & Bank</div>
+                </div>
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">📊</div>
+                  <div class="stat-value" style="font-size: 20px;">$${(latestEntry.assets.investments || 0).toLocaleString()}</div>
+                  <div class="stat-label">Investments</div>
+                </div>
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">🏠</div>
+                  <div class="stat-value" style="font-size: 20px;">$${(latestEntry.assets.property || 0).toLocaleString()}</div>
+                  <div class="stat-label">Property</div>
+                </div>
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">📦</div>
+                  <div class="stat-value" style="font-size: 20px;">$${(latestEntry.assets.other || 0).toLocaleString()}</div>
+                  <div class="stat-label">Other</div>
+                </div>
+              </div>
+            `}
+          </div>
+          <div class="expanded-section">
+            <div class="expanded-section-title" style="color: var(--accent-danger);">
+              <span>💳</span> Liability Breakdown
+            </div>
+            ${!latestEntry ? `
+              <div style="text-align: center; color: var(--text-muted); padding: 40px;">No data yet</div>
+            ` : `
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">💳</div>
+                  <div class="stat-value" style="font-size: 20px; color: var(--accent-danger);">$${(latestEntry.liabilities.creditCard || 0).toLocaleString()}</div>
+                  <div class="stat-label">Credit Cards</div>
+                </div>
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">📄</div>
+                  <div class="stat-value" style="font-size: 20px; color: var(--accent-danger);">$${(latestEntry.liabilities.loans || 0).toLocaleString()}</div>
+                  <div class="stat-label">Loans</div>
+                </div>
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">🏡</div>
+                  <div class="stat-value" style="font-size: 20px; color: var(--accent-danger);">$${(latestEntry.liabilities.mortgage || 0).toLocaleString()}</div>
+                  <div class="stat-label">Mortgage</div>
+                </div>
+                <div class="stat-card-large" style="padding: 16px;">
+                  <div class="stat-icon">📋</div>
+                  <div class="stat-value" style="font-size: 20px; color: var(--accent-danger);">$${(latestEntry.liabilities.other || 0).toLocaleString()}</div>
+                  <div class="stat-label">Other</div>
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title">
+            <span>📊</span> Net Worth History (${historyData.length} entries)
+          </div>
+          ${historyData.length === 0 ? `
+            <div style="text-align: center; color: var(--text-muted); padding: 40px;">No history yet. Start tracking your net worth!</div>
+          ` : `
+            <div style="display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 20px 0;">
+              ${historyData.map((entry, i) => `
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;">
+                  <div style="flex: 1; display: flex; align-items: flex-end; width: 100%;">
+                    <div style="width: 100%; height: ${(Math.abs(entry.netWorth) / maxNetWorth) * 100}%; background: ${entry.netWorth >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'}; border-radius: 4px 4px 0 0; min-height: 4px; opacity: ${0.4 + (i / historyData.length * 0.6)};" title="$${entry.netWorth.toLocaleString()}"></div>
+                  </div>
+                  <div style="font-size: 9px; color: var(--text-muted); margin-top: 4px; transform: rotate(-45deg); white-space: nowrap;">${new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+
+    // Bind button
+    const addBtn = container.querySelector('#nw-expanded-add');
+    if (addBtn) addBtn.onclick = () => this.showAddModal();
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,date,cash,investments,property,otherAssets,creditCard,loans,mortgage,otherLiabilities,totalAssets,totalLiabilities,netWorth\n';

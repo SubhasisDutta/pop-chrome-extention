@@ -284,6 +284,102 @@ const TruthLogger = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with time tracking analytics
+   */
+  async renderExpanded() {
+    const container = document.getElementById('truth-logger-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const todayStats = this.getTodayStats(data.timeLog);
+    const total = todayStats.deep + todayStats.shallow;
+    const deepPercent = total > 0 ? Math.round((todayStats.deep / total) * 100) : 0;
+
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(); date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      const log = data.timeLog.find(l => l.date === dateKey) || { deep: 0, shallow: 0 };
+      last7Days.push({ date: date.toLocaleDateString('en-US', { weekday: 'short' }), ...log });
+    }
+    const maxTime = Math.max(...last7Days.map(d => d.deep + d.shallow)) || 1;
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">⏱️</span>Truth Logger</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-primary);">${todayStats.deep}m</div><div class="expanded-stat-label">Deep Work</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: var(--accent-warning);">${todayStats.shallow}m</div><div class="expanded-stat-label">Shallow Work</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: ${deepPercent >= 60 ? 'var(--accent-success)' : 'var(--accent-danger)'};">${deepPercent}%</div><div class="expanded-stat-label">Deep Ratio</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; display: flex; gap: 8px;">
+          <button class="btn btn-primary" id="tl-exp-log">⏱️ Log Time</button>
+          <button class="btn btn-secondary" id="tl-exp-categorize">🏷️ Categorize Site</button>
+        </div>
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>📊</span> Today's Balance</div>
+            <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+              <div style="flex: 1; text-align: center; padding: 24px; background: rgba(139, 92, 246, 0.1); border-radius: 12px;">
+                <div style="font-size: 40px; font-weight: 700; color: var(--accent-primary);">${todayStats.deep}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Deep Minutes</div>
+              </div>
+              <div style="flex: 1; text-align: center; padding: 24px; background: rgba(245, 158, 11, 0.1); border-radius: 12px;">
+                <div style="font-size: 40px; font-weight: 700; color: var(--accent-warning);">${todayStats.shallow}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Shallow Minutes</div>
+              </div>
+            </div>
+            <div class="progress-bar" style="height: 16px;">
+              <div style="height: 100%; width: ${deepPercent}%; background: var(--accent-primary); border-radius: 8px;"></div>
+            </div>
+            <div style="text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px;">${deepPercent}% Deep Work</div>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>🏷️</span> Site Categories</div>
+            <div style="max-height: 200px; overflow-y: auto;">
+              ${Object.keys(data.deepSites).length === 0 && Object.keys(data.shallowSites).length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 40px;">No sites categorized</div>' : `
+                <div style="margin-bottom: 12px;"><div style="font-size: 12px; font-weight: 600; color: var(--accent-primary); margin-bottom: 8px;">Deep Work Sites</div>${Object.keys(data.deepSites).slice(0, 5).map(s => `<span class="tag" style="margin-right: 4px; margin-bottom: 4px;">${s}</span>`).join('') || '<span style="color: var(--text-muted);">None</span>'}</div>
+                <div><div style="font-size: 12px; font-weight: 600; color: var(--accent-warning); margin-bottom: 8px;">Shallow Work Sites</div>${Object.keys(data.shallowSites).slice(0, 5).map(s => `<span class="tag" style="margin-right: 4px; margin-bottom: 4px;">${s}</span>`).join('') || '<span style="color: var(--text-muted);">None</span>'}</div>
+              `}
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title"><span>📈</span> Last 7 Days</div>
+          <div style="display: flex; align-items: flex-end; gap: 12px; height: 200px; padding: 10px 0;">
+            ${last7Days.map(day => `
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;">
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; width: 100%; gap: 2px;">
+                  <div style="width: 100%; height: ${(day.deep / maxTime) * 100}%; background: var(--accent-primary); border-radius: 4px 4px 0 0; min-height: 2px;" title="Deep: ${day.deep}m"></div>
+                  <div style="width: 100%; height: ${(day.shallow / maxTime) * 100}%; background: var(--accent-warning); border-radius: 0 0 4px 4px; min-height: 2px;" title="Shallow: ${day.shallow}m"></div>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px;">${day.date}</div>
+                <div style="font-size: 10px; color: var(--accent-primary);">${day.deep}m</div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="display: flex; justify-content: center; gap: 24px; font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+            <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--accent-primary); border-radius: 2px; margin-right: 4px;"></span>Deep</span>
+            <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--accent-warning); border-radius: 2px; margin-right: 4px;"></span>Shallow</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const logBtn = container.querySelector('#tl-exp-log');
+    if (logBtn) logBtn.onclick = () => this.showLogModal();
+
+    const catBtn = container.querySelector('#tl-exp-categorize');
+    if (catBtn) catBtn.onclick = () => this.showCategorizeSiteModal();
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'date,deep,shallow\n';

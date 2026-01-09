@@ -231,6 +231,150 @@ const CashFlow = {
     return div.innerHTML;
   },
 
+  /**
+   * Render expanded view with detailed analytics
+   */
+  async renderExpanded() {
+    const container = document.getElementById('cash-flow-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const monthTransactions = this.getCurrentMonthData(data.transactions);
+    const allTransactions = data.transactions;
+
+    const totalIncome = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const totalExpense = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const balance = totalIncome - totalExpense;
+    const monthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    // Category breakdown
+    const expenseByCategory = {};
+    const incomeByCategory = {};
+    monthTransactions.forEach(t => {
+      if (t.type === 'expense') {
+        expenseByCategory[t.category] = (expenseByCategory[t.category] || 0) + parseFloat(t.amount);
+      } else {
+        incomeByCategory[t.category] = (incomeByCategory[t.category] || 0) + parseFloat(t.amount);
+      }
+    });
+
+    // Last 6 months trend
+    const last6Months = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthKey = date.toISOString().slice(0, 7);
+      const monthTx = allTransactions.filter(t => t.date.startsWith(monthKey));
+      const income = monthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      const expense = monthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      last6Months.push({
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        income,
+        expense,
+        balance: income - expense
+      });
+    }
+    const maxAmount = Math.max(...last6Months.map(m => Math.max(m.income, m.expense))) || 1;
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title">
+            <span class="expanded-title-icon">💰</span>
+            Cash Flow - ${monthName}
+          </div>
+          <div class="expanded-stats">
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--accent-success);">$${totalIncome.toLocaleString()}</div>
+              <div class="expanded-stat-label">Income</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: var(--accent-danger);">$${totalExpense.toLocaleString()}</div>
+              <div class="expanded-stat-label">Expenses</div>
+            </div>
+            <div class="expanded-stat">
+              <div class="expanded-stat-value" style="color: ${balance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">${balance >= 0 ? '+' : ''}$${balance.toLocaleString()}</div>
+              <div class="expanded-stat-label">Balance</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <button class="btn btn-primary" id="cf-expanded-add" style="margin-right: 8px;">+ Add Transaction</button>
+        </div>
+
+        <div class="expanded-grid-3" style="margin-bottom: 24px;">
+          <div class="expanded-section" style="grid-column: span 2;">
+            <div class="expanded-section-title">
+              <span>📊</span> 6-Month Trend
+            </div>
+            <div style="display: flex; align-items: flex-end; gap: 16px; height: 180px; padding: 20px 0;">
+              ${last6Months.map(m => `
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;">
+                  <div style="flex: 1; display: flex; align-items: flex-end; gap: 4px; width: 100%;">
+                    <div style="flex: 1; height: ${(m.income / maxAmount) * 100}%; background: var(--accent-success); border-radius: 4px 4px 0 0; min-height: 4px;" title="Income: $${m.income.toLocaleString()}"></div>
+                    <div style="flex: 1; height: ${(m.expense / maxAmount) * 100}%; background: var(--accent-danger); border-radius: 4px 4px 0 0; min-height: 4px;" title="Expense: $${m.expense.toLocaleString()}"></div>
+                  </div>
+                  <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px;">${m.month}</div>
+                  <div style="font-size: 10px; color: ${m.balance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">${m.balance >= 0 ? '+' : ''}$${Math.abs(m.balance).toLocaleString()}</div>
+                </div>
+              `).join('')}
+            </div>
+            <div style="display: flex; justify-content: center; gap: 24px; font-size: 11px; color: var(--text-muted);">
+              <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--accent-success); border-radius: 2px; margin-right: 4px;"></span>Income</span>
+              <span><span style="display: inline-block; width: 12px; height: 12px; background: var(--accent-danger); border-radius: 2px; margin-right: 4px;"></span>Expenses</span>
+            </div>
+          </div>
+          <div class="expanded-section">
+            <div class="expanded-section-title">
+              <span>💸</span> Expense Breakdown
+            </div>
+            <div style="max-height: 200px; overflow-y: auto;">
+              ${Object.entries(expenseByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amount]) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
+                  <span style="font-size: 13px;">${cat}</span>
+                  <span style="font-weight: 600; color: var(--accent-danger);">$${amount.toLocaleString()}</span>
+                </div>
+              `).join('') || '<div style="color: var(--text-muted); text-align: center; padding: 20px;">No expenses this month</div>'}
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title">
+            <span>📋</span> All Transactions This Month (${monthTransactions.length})
+          </div>
+          <ul class="item-list expanded-list" style="max-height: 300px;">
+            ${monthTransactions.length === 0 ? `
+              <li style="justify-content: center; color: var(--text-muted);">No transactions this month</li>
+            ` : monthTransactions.map(t => `
+              <li data-id="${t.id}">
+                <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                  <span style="font-size: 20px;">${t.type === 'income' ? '💵' : '💸'}</span>
+                  <div style="flex: 1;">
+                    <div style="font-size: 14px;">${this.escapeHtml(t.description || t.category)}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">${t.category} • ${new Date(t.date).toLocaleDateString()}</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 600; font-size: 16px; color: ${t.type === 'income' ? 'var(--accent-success)' : 'var(--accent-danger)'};">
+                    ${t.type === 'income' ? '+' : '-'}$${parseFloat(t.amount).toLocaleString()}
+                  </div>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+
+    // Bind add button
+    const addBtn = container.querySelector('#cf-expanded-add');
+    if (addBtn) {
+      addBtn.onclick = () => this.showAddModal();
+    }
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'id,date,type,category,description,amount\n';

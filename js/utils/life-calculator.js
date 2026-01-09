@@ -302,6 +302,100 @@ const LifeCalculator = {
     });
   },
 
+  /**
+   * Render expanded view with detailed life metrics
+   */
+  async renderExpanded() {
+    const container = document.getElementById('life-calculator-content');
+    if (!container) return;
+
+    const data = await this.getData();
+    const metrics = this.calculateMetrics(data);
+
+    if (!metrics) {
+      container.innerHTML = `
+        <div class="expanded-content">
+          <div style="text-align: center; padding: 80px 40px;">
+            <div style="font-size: 80px; margin-bottom: 24px;">⏳</div>
+            <h2 style="margin-bottom: 12px;">Life Calculator</h2>
+            <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 24px;">Set up your life metrics to see your remaining time and financial freedom progress.</p>
+            <button class="btn btn-primary btn-lg" id="lc-exp-setup">Set Up Now</button>
+          </div>
+        </div>
+      `;
+      const setupBtn = container.querySelector('#lc-exp-setup');
+      if (setupBtn) setupBtn.onclick = () => this.showSetupModal();
+      return;
+    }
+
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    container.innerHTML = `
+      <div class="expanded-content">
+        <div class="expanded-header">
+          <div class="expanded-title"><span class="expanded-title-icon">⏳</span>Life Calculator</div>
+          <div class="expanded-stats">
+            <div class="expanded-stat"><div class="expanded-stat-value">${metrics.ageYears}</div><div class="expanded-stat-label">Current Age</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">${this.formatNumber(metrics.remainingWeeks)}</div><div class="expanded-stat-label">Weeks Left</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value">$${metrics.hourWorth.toFixed(2)}</div><div class="expanded-stat-label">Hour Worth</div></div>
+            <div class="expanded-stat"><div class="expanded-stat-value" style="color: ${metrics.freedomProgress >= 100 ? 'var(--accent-success)' : 'var(--accent-warning)'};">${metrics.freedomProgress.toFixed(1)}%</div><div class="expanded-stat-label">Financial Freedom</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;"><button class="btn btn-secondary" id="lc-exp-edit">⚙️ Edit Settings</button></div>
+
+        <div class="expanded-grid-2" style="margin-bottom: 24px;">
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>⏱️</span> Time Remaining</div>
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="font-size: 12px; color: var(--text-muted);">Life Progress (Age ${metrics.ageYears} of ${data.expectedLifespan})</div>
+              <div class="progress-bar" style="height: 24px; margin: 12px 0;">
+                <div class="progress-fill ${metrics.lifeProgress > 75 ? 'danger' : metrics.lifeProgress > 50 ? 'warning' : 'success'}" style="width: ${metrics.lifeProgress}%;"></div>
+              </div>
+              <div style="font-size: 28px; font-weight: 700; color: var(--accent-primary);">${metrics.lifeProgress.toFixed(1)}%</div>
+            </div>
+            <div class="expanded-grid-2" style="gap: 12px;">
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">📅</div><div class="stat-value" style="font-size: 24px;">${this.formatNumber(metrics.remainingWeeks)}</div><div class="stat-label">Weeks</div></div>
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">⏰</div><div class="stat-value" style="font-size: 24px;">${this.formatNumber(metrics.usableHours)}</div><div class="stat-label">Usable Hours</div></div>
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">🌅</div><div class="stat-value" style="font-size: 24px;">${this.formatNumber(metrics.daysUntilEnd)}</div><div class="stat-label">Days</div></div>
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">🎂</div><div class="stat-value" style="font-size: 24px;">${data.expectedLifespan - metrics.ageYears}</div><div class="stat-label">Years</div></div>
+            </div>
+          </div>
+
+          <div class="expanded-section">
+            <div class="expanded-section-title"><span>💰</span> Financial Freedom</div>
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="font-size: 12px; color: var(--text-muted);">Progress to Financial Independence</div>
+              <div class="progress-bar" style="height: 24px; margin: 12px 0;">
+                <div class="progress-fill ${metrics.freedomProgress >= 100 ? 'success' : metrics.freedomProgress >= 50 ? 'warning' : ''}" style="width: ${Math.min(100, metrics.freedomProgress)}%;"></div>
+              </div>
+              <div style="font-size: 16px; color: var(--text-muted);">$${this.formatNumber(data.netWorth)} / $${this.formatNumber(Math.round(metrics.freedomAim))}</div>
+            </div>
+            <div class="expanded-grid-2" style="gap: 12px;">
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">💵</div><div class="stat-value" style="font-size: 20px;">$${this.formatNumber(data.netWorth)}</div><div class="stat-label">Net Worth</div></div>
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">🎯</div><div class="stat-value" style="font-size: 20px;">$${this.formatNumber(Math.round(metrics.freedomAim))}</div><div class="stat-label">Freedom Target</div></div>
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">📈</div><div class="stat-value" style="font-size: 20px; color: var(--accent-success);">$${this.formatNumber(Math.round(metrics.autoIncome))}</div><div class="stat-label">Auto Income/mo</div></div>
+              <div class="stat-card-large" style="padding: 16px;"><div class="stat-icon">💳</div><div class="stat-value" style="font-size: 20px; color: var(--accent-danger);">$${this.formatNumber(Math.round(metrics.monthlyExpense))}</div><div class="stat-label">Monthly Expenses</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expanded-section">
+          <div class="expanded-section-title"><span>📊</span> Key Metrics</div>
+          <div class="expanded-grid-4">
+            <div class="stat-card-large"><div class="stat-icon">🕐</div><div class="stat-value" style="font-size: 24px;">$${metrics.hourWorth.toFixed(2)}</div><div class="stat-label">Value per Hour</div></div>
+            <div class="stat-card-large"><div class="stat-icon">📅</div><div class="stat-value" style="font-size: 24px;">${metrics.expectedEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div><div class="stat-label">Expected End</div></div>
+            <div class="stat-card-large"><div class="stat-icon">⏰</div><div class="stat-value" style="font-size: 24px;">${data.weeklyHours}</div><div class="stat-label">Weekly Hours</div></div>
+            <div class="stat-card-large"><div class="stat-icon">💰</div><div class="stat-value" style="font-size: 24px;">$${this.formatNumber(data.monthlySavings)}</div><div class="stat-label">Monthly Savings</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const editBtn = container.querySelector('#lc-exp-edit');
+    if (editBtn) editBtn.onclick = () => this.showSetupModal();
+  },
+
   async exportToCSV() {
     const data = await this.getData();
     let csv = 'field,value\n';
