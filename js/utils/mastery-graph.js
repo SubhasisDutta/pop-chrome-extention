@@ -196,6 +196,18 @@ const MasteryGraph = {
     });
   },
 
+  getTodayValue(entries) {
+    const todayKey = this.getTodayKey();
+    const todayEntry = entries.find(e => e.date.startsWith(todayKey));
+    return todayEntry?.value || 0;
+  },
+
+  getYesterdayValue(entries) {
+    const yesterdayKey = this.getYesterdayKey();
+    const yesterdayEntry = entries.find(e => e.date.startsWith(yesterdayKey));
+    return yesterdayEntry?.value || 0;
+  },
+
   async showMetricModal() {
     const data = await this.getData();
 

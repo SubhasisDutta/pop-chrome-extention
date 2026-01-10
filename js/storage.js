@@ -143,10 +143,12 @@ const POPStorage = {
    */
   async setUtilityEnabled(utilityName, enabled) {
     const settings = await this.getSettings();
-    if (settings.utilities[utilityName]) {
+    if (!settings.utilities[utilityName]) {
+      settings.utilities[utilityName] = { enabled: enabled };
+    } else {
       settings.utilities[utilityName].enabled = enabled;
-      return this.saveSettings(settings);
     }
+    await this.set(this.KEYS.SETTINGS, settings);
   },
 
   /**

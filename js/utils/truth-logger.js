@@ -350,9 +350,9 @@ const TruthLogger = {
           <div class="expanded-section">
             <div class="expanded-section-title"><span>🏷️</span> Site Categories</div>
             <div style="max-height: 200px; overflow-y: auto;">
-              ${Object.keys(data.deepSites).length === 0 && Object.keys(data.shallowSites).length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 40px;">No sites categorized</div>' : `
-                <div style="margin-bottom: 12px;"><div style="font-size: 12px; font-weight: 600; color: var(--accent-primary); margin-bottom: 8px;">Deep Work Sites</div>${Object.keys(data.deepSites).slice(0, 5).map(s => `<span class="tag" style="margin-right: 4px; margin-bottom: 4px;">${s}</span>`).join('') || '<span style="color: var(--text-muted);">None</span>'}</div>
-                <div><div style="font-size: 12px; font-weight: 600; color: var(--accent-warning); margin-bottom: 8px;">Shallow Work Sites</div>${Object.keys(data.shallowSites).slice(0, 5).map(s => `<span class="tag" style="margin-right: 4px; margin-bottom: 4px;">${s}</span>`).join('') || '<span style="color: var(--text-muted);">None</span>'}</div>
+              ${Object.keys(data.siteCategories || {}).length === 0 ? '<div style="text-align: center; color: var(--text-muted); padding: 40px;">No sites categorized</div>' : `
+                <div style="margin-bottom: 12px;"><div style="font-size: 12px; font-weight: 600; color: var(--accent-primary); margin-bottom: 8px;">Deep Work Sites</div>${Object.entries(data.siteCategories || {}).filter(([_, cat]) => cat === 'deep').slice(0, 5).map(([site, _]) => `<span class="tag" style="margin-right: 4px; margin-bottom: 4px;">${site}</span>`).join('') || '<span style="color: var(--text-muted);">None</span>'}</div>
+                <div><div style="font-size: 12px; font-weight: 600; color: var(--accent-warning); margin-bottom: 8px;">Shallow Work Sites</div>${Object.entries(data.siteCategories || {}).filter(([_, cat]) => cat === 'shallow').slice(0, 5).map(([site, _]) => `<span class="tag" style="margin-right: 4px; margin-bottom: 4px;">${site}</span>`).join('') || '<span style="color: var(--text-muted);">None</span>'}</div>
               `}
             </div>
           </div>

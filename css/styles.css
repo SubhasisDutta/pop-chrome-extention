@@ -1005,17 +1005,26 @@ body.has-expanded-utility {
   overflow: hidden;
 }
 
-body.has-expanded-utility .bento-grid {
-  display: flex;
-  gap: 0;
-  padding: 0;
-  height: calc(100vh - 80px);
-  max-width: 100%;
+/* Wrapper for sidebar and grid */
+.expand-container {
+  display: block;
+  width: 100%;
 }
 
-/* Sidebar when expanded */
+/* Sidebar hidden by default */
 .expand-sidebar {
   display: none;
+}
+
+/* When expanded: show sidebar and use flex layout */
+body.has-expanded-utility .expand-container {
+  display: flex;
+  height: calc(100vh - 80px);
+  width: 100%;
+}
+
+body.has-expanded-utility .expand-sidebar {
+  display: flex;
   flex-direction: column;
   width: 70px;
   min-width: 70px;
@@ -1025,13 +1034,16 @@ body.has-expanded-utility .bento-grid {
   padding: 12px 8px;
   gap: 8px;
   overflow-y: auto;
-  height: calc(100vh - 80px);
-  position: sticky;
-  top: 80px;
+  height: 100%;
 }
 
-body.has-expanded-utility .expand-sidebar {
+body.has-expanded-utility .bento-grid {
   display: flex;
+  gap: 0;
+  padding: 0;
+  height: 100%;
+  max-width: 100%;
+  flex: 1;
 }
 
 .sidebar-icon {
@@ -1114,8 +1126,7 @@ body.has-expanded-utility .bento-item:not(.expanded) {
 /* Expanded utility takes full space */
 .bento-item.expanded {
   flex: 1;
-  min-height: calc(100vh - 80px);
-  max-height: calc(100vh - 80px);
+  height: 100%;
   overflow-y: auto;
   border-radius: 0;
   margin: 0;
@@ -1124,7 +1135,7 @@ body.has-expanded-utility .bento-item:not(.expanded) {
 }
 
 .bento-item.expanded .bubble-content {
-  min-height: calc(100vh - 200px);
+  min-height: 100%;
 }
 
 /* Expand button on each bubble */

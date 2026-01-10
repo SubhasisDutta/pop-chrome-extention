@@ -369,7 +369,7 @@ const DailyNegotiator = {
     if (!container) return;
 
     const data = await this.getData();
-    const todayPlan = this.getTodayPlan(data.plans);
+    const todayPlan = await this.getTodayPlan();
     const completedToday = todayPlan ? todayPlan.tasks.filter(t => t.completed).length : 0;
     const totalToday = todayPlan ? todayPlan.tasks.length : 0;
     const hardTasks = todayPlan ? todayPlan.tasks.filter(t => t.isHard && !t.completed) : [];

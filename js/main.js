@@ -57,7 +57,7 @@ async function initializeSampleData() {
 async function loadSettings() {
   const settings = await POPStorage.getSettings();
 
-  // Apply utility visibility
+  // Apply utility visibility to bubbles
   Object.entries(settings.utilities).forEach(([key, config]) => {
     const element = document.querySelector(`[data-utility="${key}"]`);
     if (element) {
@@ -68,6 +68,11 @@ async function loadSettings() {
       }
     }
   });
+
+  // Update sidebar icon visibility based on bubble visibility
+  if (typeof ExpandManager !== 'undefined' && typeof ExpandManager.updateSidebarVisibility === 'function') {
+    ExpandManager.updateSidebarVisibility();
+  }
 
   return settings;
 }
@@ -139,7 +144,7 @@ async function renderSettings() {
       const enabled = e.target.checked;
       await POPStorage.setUtilityEnabled(utility, enabled);
 
-      // Update visibility
+      // Update bubble visibility
       const element = document.querySelector(`[data-utility="${utility}"]`);
       if (element) {
         if (enabled) {
@@ -147,6 +152,11 @@ async function renderSettings() {
         } else {
           element.classList.add('bubble-hidden');
         }
+      }
+
+      // Update sidebar icon visibility
+      if (typeof ExpandManager !== 'undefined' && typeof ExpandManager.updateSidebarVisibility === 'function') {
+        ExpandManager.updateSidebarVisibility();
       }
 
       showToast(`${UTILITY_MAP[utility]?.name || utility} ${enabled ? 'enabled' : 'disabled'}`, 'success');

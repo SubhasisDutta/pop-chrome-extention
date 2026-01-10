@@ -40,6 +40,11 @@ const ExpandManager = {
     const mainGrid = document.getElementById('mainGrid');
     if (!mainGrid) return;
 
+    // Create container for sidebar and grid
+    const container = document.createElement('div');
+    container.className = 'expand-container';
+    container.id = 'expandContainer';
+
     // Create sidebar element
     const sidebar = document.createElement('div');
     sidebar.className = 'expand-sidebar';
@@ -64,11 +69,14 @@ const ExpandManager = {
         <span class="icon-emoji">${util.icon}</span>
         <span class="icon-label">${util.name}</span>
       `;
+      iconDiv.id = `sidebar-icon-${util.id}`;
       sidebar.appendChild(iconDiv);
     });
 
-    // Insert sidebar before the grid
-    mainGrid.parentNode.insertBefore(sidebar, mainGrid);
+    // Move grid into container and add sidebar
+    mainGrid.parentNode.insertBefore(container, mainGrid);
+    container.appendChild(sidebar);
+    container.appendChild(mainGrid);
   },
 
   /**
@@ -149,6 +157,13 @@ const ExpandManager = {
       );
       if (prevBubble) {
         prevBubble.classList.remove('expanded');
+
+        // Reset previous bubble's expand button
+        const prevExpandBtn = prevBubble.querySelector('.bubble-expand-btn');
+        if (prevExpandBtn) {
+          prevExpandBtn.innerHTML = '⛶';
+          prevExpandBtn.title = 'Expand';
+        }
       }
     }
 
@@ -246,10 +261,7 @@ const ExpandManager = {
 
     const entry = moduleMap[utilityId];
     if (entry && entry.module && typeof entry.module.renderExpanded === 'function') {
-      const container = document.getElementById(entry.contentId);
-      if (container) {
-        entry.module.renderExpanded(container);
-      }
+      entry.module.renderExpanded();
     }
   },
 
@@ -292,6 +304,24 @@ const ExpandManager = {
    */
   getExpanded() {
     return this.currentExpanded;
+  },
+
+  /**
+   * Update sidebar icon visibility based on bubble visibility
+   */
+  updateSidebarVisibility() {
+    this.utilities.forEach(util => {
+      const bubble = document.getElementById(util.bubbleId);
+      const sidebarIcon = document.getElementById(`sidebar-icon-${util.id}`);
+
+      if (bubble && sidebarIcon) {
+        if (bubble.classList.contains('bubble-hidden')) {
+          sidebarIcon.classList.add('bubble-hidden');
+        } else {
+          sidebarIcon.classList.remove('bubble-hidden');
+        }
+      }
+    });
   }
 };
 
