@@ -57,14 +57,14 @@ async function initializeSampleData() {
 async function loadSettings() {
   const settings = await POPStorage.getSettings();
 
-  // Apply utility visibility to bubbles
+  // Apply utility visibility to bubbles (use .bento-item to target bubbles specifically, not settings checkboxes)
   Object.entries(settings.utilities).forEach(([key, config]) => {
-    const element = document.querySelector(`[data-utility="${key}"]`);
-    if (element) {
+    const bubble = document.querySelector(`.bento-item[data-utility="${key}"]`);
+    if (bubble) {
       if (config.enabled) {
-        element.classList.remove('bubble-hidden');
+        bubble.classList.remove('bubble-hidden');
       } else {
-        element.classList.add('bubble-hidden');
+        bubble.classList.add('bubble-hidden');
       }
     }
   });
@@ -144,13 +144,13 @@ async function renderSettings() {
       const enabled = e.target.checked;
       await POPStorage.setUtilityEnabled(utility, enabled);
 
-      // Update bubble visibility
-      const element = document.querySelector(`[data-utility="${utility}"]`);
-      if (element) {
+      // Update bubble visibility (use .bento-item to target bubbles specifically, not settings checkboxes)
+      const bubble = document.querySelector(`.bento-item[data-utility="${utility}"]`);
+      if (bubble) {
         if (enabled) {
-          element.classList.remove('bubble-hidden');
+          bubble.classList.remove('bubble-hidden');
         } else {
-          element.classList.add('bubble-hidden');
+          bubble.classList.add('bubble-hidden');
         }
       }
 

@@ -112,7 +112,24 @@ const POPStorage = {
    */
   async getSettings() {
     const settings = await this.get(this.KEYS.SETTINGS);
-    return { ...this.DEFAULT_SETTINGS, ...settings };
+    if (!settings) return { ...this.DEFAULT_SETTINGS };
+
+    // Deep merge utilities to ensure all defaults are present
+    const mergedUtilities = { ...this.DEFAULT_SETTINGS.utilities };
+    if (settings.utilities) {
+      Object.keys(this.DEFAULT_SETTINGS.utilities).forEach(key => {
+        mergedUtilities[key] = {
+          ...this.DEFAULT_SETTINGS.utilities[key],
+          ...(settings.utilities[key] || {})
+        };
+      });
+    }
+
+    return {
+      ...this.DEFAULT_SETTINGS,
+      ...settings,
+      utilities: mergedUtilities
+    };
   },
 
   /**
