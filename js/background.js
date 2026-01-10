@@ -218,23 +218,33 @@ chrome.commands.onCommand.addListener(async (command) => {
 // Show quick capture overlay on current tab
 async function showQuickCapture() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab) {
-    chrome.tabs.sendMessage(tab.id, { action: 'showQuickCapture' });
+  if (tab && tab.id) {
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action: 'showQuickCapture' });
+    } catch (e) {
+      // Content script not loaded on this tab (e.g., chrome:// pages)
+      console.log('Cannot send message to tab:', e.message);
+    }
   }
 }
 
 // Trigger flow check on current tab
 async function triggerFlowCheck() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab) {
-    chrome.tabs.sendMessage(tab.id, { action: 'showFlowCheck' });
+  if (tab && tab.id) {
+    try {
+      await chrome.tabs.sendMessage(tab.id, { action: 'showFlowCheck' });
+    } catch (e) {
+      // Content script not loaded on this tab
+      console.log('Cannot send message to tab:', e.message);
+    }
   }
 }
 
 // Trigger time log for current site
 async function triggerTimeLog() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab) {
+  if (tab && tab.id) {
     try {
       const url = new URL(tab.url);
       const domain = url.hostname;
@@ -245,20 +255,21 @@ async function triggerTimeLog() {
 
       if (category) {
         // Site already categorized - just show badge
-        chrome.tabs.sendMessage(tab.id, {
+        await chrome.tabs.sendMessage(tab.id, {
           action: 'showTruthBadge',
           category,
           domain
         });
       } else {
         // Ask to categorize
-        chrome.tabs.sendMessage(tab.id, {
+        await chrome.tabs.sendMessage(tab.id, {
           action: 'categorizesite',
           domain
         });
       }
     } catch (e) {
-      console.error('Error triggering time log:', e);
+      // Content script not loaded or invalid URL
+      console.log('Error triggering time log:', e.message);
     }
   }
 }
@@ -371,12 +382,17 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === 'pop-capture-text') {
     const text = info.selectionText;
-    if (text) {
-      // Show a simple prompt in the content script
-      chrome.tabs.sendMessage(tab.id, {
-        action: 'captureSelection',
-        text
-      });
+    if (text && tab && tab.id) {
+      try {
+        // Show a simple prompt in the content script
+        await chrome.tabs.sendMessage(tab.id, {
+          action: 'captureSelection',
+          text
+        });
+      } catch (e) {
+        // Content script not loaded on this tab
+        console.log('Cannot capture selection on this tab:', e.message);
+      }
     }
   }
 

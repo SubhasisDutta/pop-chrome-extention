@@ -257,7 +257,10 @@ const DigitalCleaner = {
     return div.innerHTML;
   },
 
-  async renderExpanded(container) {
+  async renderExpanded() {
+    const container = document.getElementById('digital-cleaner-content');
+    if (!container) return;
+
     const data = await this.getData();
     const allOldBookmarks = await this.getOldBookmarks(50);
 
@@ -373,7 +376,7 @@ const DigitalCleaner = {
         await this.archiveBookmark(bm);
       }
       window.showToast?.('All bookmarks archived', 'success');
-      this.renderExpanded(container);
+      this.renderExpanded();
     });
   },
 
