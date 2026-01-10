@@ -1400,3 +1400,115 @@ body.has-expanded-utility .bento-item:not(.expanded) {
     justify-content: space-around;
   }
 }
+
+/* ======================================
+   INFO ICON AND TOOLTIP
+   ====================================== */
+
+/* Info icon - circle with ? */
+.bubble-info-icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.bubble-info-icon::before {
+  content: '?';
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.bubble-info-icon:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.bubble-info-icon:hover::before {
+  color: white;
+}
+
+/* Tooltip */
+.bubble-info-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  min-width: 200px;
+  max-width: 300px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 10000;
+  pointer-events: none;
+  white-space: normal;
+}
+
+/* Dark theme tooltip enhancement */
+[data-theme="dark"] .bubble-info-tooltip {
+  background: rgba(26, 26, 30, 0.95);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+}
+
+.bubble-info-icon:hover .bubble-info-tooltip {
+  opacity: 1;
+  visibility: visible;
+  margin-top: 12px;
+}
+
+/* Tooltip arrow */
+.bubble-info-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent var(--glass-border) transparent;
+}
+
+.bubble-info-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--card-bg) transparent;
+}
+
+/* Dark theme tooltip arrow */
+[data-theme="dark"] .bubble-info-tooltip::after {
+  border-color: transparent transparent rgba(26, 26, 30, 0.95) transparent;
+}
+
+/* Responsive tooltip positioning */
+@media (max-width: 768px) {
+  .bubble-info-tooltip {
+    max-width: 250px;
+    font-size: 12px;
+  }
+}
