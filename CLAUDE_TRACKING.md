@@ -18,13 +18,14 @@ This file helps Claude (and subagents) keep track of the POP extension developme
 
 | File | Purpose |
 |------|---------|
-| `manifest.json` | Extension configuration, permissions, commands |
+| `manifest.json` | Extension configuration, permissions, commands (max 4 shortcuts) |
 | `js/background.js` | Service worker for hotkeys, alarms, messaging |
 | `js/content.js` | Injected into pages for overlays/widgets |
-| `js/main.js` | Dashboard page orchestrator |
+| `js/main.js` | Dashboard page orchestrator, settings management |
 | `js/storage.js` | Chrome storage wrapper with export/import |
 | `js/theme.js` | Dark/light mode management |
 | `js/sampleData.js` | Initial demo data generator |
+| `js/expand-manager.js` | Expand/minimize functionality with sidebar navigation |
 
 ### Utility Modules (js/utils/)
 
@@ -74,18 +75,20 @@ const STORAGE_KEYS = {
 
 ## Hotkeys Reference
 
+**IMPORTANT**: Chrome Manifest V3 limits extensions to a maximum of 4 keyboard shortcuts.
+
+### Active Shortcuts
+
 | Command ID | Default Key | Description |
 |-----------|-------------|-------------|
 | cognitive-offload | Alt+C | Quick capture overlay |
-| question-primer | Alt+Q | Set core question |
-| flow-check | Alt+F | Flow state check |
-| time-log | Alt+T | Time logger |
-| daily-plan | Alt+D | Daily negotiator |
 | open-dashboard | Alt+P | Full dashboard |
-| net-worth | Alt+N | Net worth update |
-| cash-flow | Alt+M | Cash flow log |
-| stock-check | Alt+S | Stock watchlist |
-| weekly-review | Alt+W | Weekly review |
+| _execute_action | - | Popup (default click) |
+
+**Note**: Additional shortcuts were removed to comply with Chrome's 4-shortcut limit. Users now access bubbles via:
+1. Dashboard grid view
+2. Expand/minimize feature with sidebar navigation
+3. Direct bubble interaction in expanded view
 
 ---
 
@@ -169,17 +172,21 @@ Add to `html/main.html`:
       <div class="bubble-icon" style="background: linear-gradient(...);">🆕</div>
       <div>
         <div class="bubble-name">New Bubble</div>
-        <span class="bubble-hotkey">Alt+X</span>
       </div>
-    </div>
-    <div class="bubble-actions">
-      <button class="btn btn-icon btn-secondary" data-export="newBubble">📤</button>
-      <button class="btn btn-icon btn-secondary" data-import="newBubble">📥</button>
+      <div class="bubble-info-icon">
+        <div class="bubble-info-tooltip">Description of what this bubble does and how to use it.</div>
+      </div>
     </div>
   </div>
   <div class="bubble-content" id="new-bubble-content"></div>
 </div>
 ```
+
+**Note**:
+- Export/import buttons removed from individual bubbles (now in Settings)
+- Hotkey display removed (limited shortcuts available)
+- Info icon with tooltip is now standard for all bubbles
+- Expand button (⛶) is auto-added by ExpandManager
 
 ### Step 3: Update main.js
 
@@ -210,18 +217,28 @@ Add to `DEFAULT_SETTINGS.utilities` in `js/storage.js`:
 newBubble: { enabled: true, hotkey: 'Alt+X' }
 ```
 
-### Step 6: Add Hotkey (Optional)
+### Step 6: Add to ExpandManager
 
-Add to `manifest.json` commands:
+Add to `js/expand-manager.js` utilities array:
 
-```json
-"new-bubble": {
-  "suggested_key": { "default": "Alt+X" },
-  "description": "New Bubble"
+```javascript
+{ id: 'newBubble', bubbleId: 'bubble-new-bubble', icon: '🆕', name: 'New Bubble' }
+```
+
+If your utility supports expanded view rendering:
+
+```javascript
+async renderExpanded() {
+  const container = document.getElementById('new-bubble-content');
+  if (!container) return;
+
+  const data = await this.getData();
+  // Render expanded view (more detailed, full-screen optimized)
+  container.innerHTML = `<!-- Expanded HTML -->`;
 }
 ```
 
-Handle in `background.js` onCommand listener.
+**Note**: Hotkeys are limited to 4 total. Do not add new hotkeys unless removing an existing one.
 
 ---
 
@@ -251,10 +268,24 @@ Handle in `background.js` onCommand listener.
 --bg-primary, --bg-secondary
 --glass-bg, --glass-border, --glass-shadow
 --text-primary, --text-secondary, --text-muted
---accent-primary, --accent-secondary
+--accent-primary: #ff9ebc (sakura pink)
+--accent-secondary: #ffb7ce (lighter sakura pink)
 --accent-success, --accent-warning, --accent-danger, --accent-info
 --card-bg, --input-bg, --hover-bg
+--bubble-active, --bubble-inactive
+--scrollbar-track, --scrollbar-thumb
 ```
+
+### New UI Elements
+- `.bubble-hidden`: Hides disabled bubbles (display: none)
+- `.bubble-info-icon`: Info icon with ? symbol
+- `.bubble-info-tooltip`: Tooltip that appears on hover
+- `.bubble-expand-btn`: Expand/minimize button (auto-added)
+- `.expand-container`: Container for sidebar + grid
+- `.expand-sidebar`: Left sidebar in expanded view
+- `.sidebar-icon`: Individual utility icons in sidebar
+- `.expanded`: Class added to bubble in full-screen mode
+- `.has-expanded-utility`: Body class when any bubble is expanded
 
 ---
 
@@ -306,17 +337,24 @@ chrome.tabs.sendMessage(tabId, {
 - [ ] Settings save and persist
 
 ### Each Bubble
-- [ ] Renders correctly
+- [ ] Renders correctly in grid view
+- [ ] Renders correctly in expanded view
 - [ ] Add/edit/delete operations work
 - [ ] Data persists after refresh
-- [ ] Export generates valid CSV
-- [ ] Import accepts valid CSV
+- [ ] Export generates valid CSV (from Settings)
+- [ ] Import accepts valid CSV (from Settings)
 - [ ] Enable/disable toggle works
+- [ ] Tooltip displays correct information
+- [ ] Expand/minimize button functions properly
+- [ ] Appears/disappears from sidebar when enabled/disabled
 
-### Hotkeys
-- [ ] All hotkeys trigger correct action
-- [ ] Quick capture overlay works
-- [ ] Dashboard opens
+### Hotkeys & Navigation
+- [ ] Alt+C triggers quick capture overlay
+- [ ] Alt+P opens dashboard
+- [ ] Escape exits expanded view
+- [ ] Sidebar navigation works in expanded view
+- [ ] Expand buttons appear on all bubbles
+- [ ] Minimize button appears when expanded
 
 ### Content Script
 - [ ] Overlays appear correctly
@@ -335,6 +373,54 @@ chrome.tabs.sendMessage(tabId, {
 1. **Icon generation**: Simple programmatic icons - consider replacing with designed icons
 2. **Stock prices**: No real-time price fetching - links to external sites only
 3. **Bookmark API**: May not work in all contexts - gracefully degrades
+4. **Keyboard shortcuts**: Limited to 4 shortcuts due to Chrome Manifest V3 restrictions
+
+## Recent Changes
+
+### Version 1.1.0 (January 2025)
+
+#### New Features
+1. **Expand/Minimize Functionality**
+   - Each bubble can expand to full-screen view
+   - Sidebar navigation with icons for all enabled bubbles
+   - Quick switching between bubbles in expanded mode
+   - ESC key to return to grid view
+   - Implemented in `js/expand-manager.js`
+
+2. **Interactive Tooltips**
+   - Info icon (?) added to all bubble headers
+   - Hover to see bubble description and usage tips
+   - Styled with glassmorphism matching theme
+   - CSS classes: `.bubble-info-icon`, `.bubble-info-tooltip`
+
+3. **Enable/Disable Improvements**
+   - Fixed toggle functionality in settings
+   - Disabled bubbles now hidden from both grid and sidebar
+   - Proper visibility synchronization
+   - Uses `.bubble-hidden` class
+
+4. **Theme Updates**
+   - Changed accent color to sakura pink (#ff9ebc)
+   - Updated both light and dark modes
+   - Improved glassmorphism effects
+
+5. **Import/Export Centralization**
+   - Moved export/import to Settings page
+   - Removed individual bubble export/import buttons
+   - Cleaner bubble headers
+
+#### Bug Fixes
+- Fixed container styling issues in grid and expanded views
+- Fixed bubble display issues when toggling enabled/disabled
+- Fixed CSP violations for inline scripts
+- Removed invalid shortcuts (Chrome 4-shortcut limit)
+
+#### UI/UX Improvements
+- Streamlined bubble headers
+- Better tooltip positioning and styling
+- Improved sidebar icon visibility
+- Updated popup styling
+- Cleaner, more consistent design
 
 ---
 
@@ -358,12 +444,25 @@ chrome.tabs.sendMessage(tabId, {
 
 ## Version History
 
-### v1.0.0
+### v1.1.0 (January 2025)
+- Added expand/minimize functionality with sidebar navigation
+- Added interactive tooltips for all bubbles
+- Fixed enable/disable toggle functionality
+- Changed theme to sakura pink accents
+- Centralized import/export to Settings page
+- Streamlined keyboard shortcuts (Chrome 4-shortcut limit)
+- Fixed container styling and display issues
+- Fixed CSP violations
+- Updated popup styling
+
+### v1.0.0 (December 2024)
 - Initial release with 14 bubbles
 - Glassmorphism UI with dark/light mode
 - Full export/import functionality
 - Sample data for first-time users
+- Bento grid layout
+- Comprehensive keyboard shortcuts
 
 ---
 
-*Last updated: January 2026*
+*Last updated: January 2025*

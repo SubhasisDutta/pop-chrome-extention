@@ -55,7 +55,20 @@ A comprehensive guide to using all 14 Bubbles in POP - Personal Organization Pla
 
 ### Layout
 
-The dashboard uses a **Bento Grid** layout - a modern, organized arrangement of cards that automatically adjusts to your screen size.
+The dashboard uses a **Bento Grid** layout - a modern, organized arrangement of cards that automatically adjusts to your screen size. The UI features a beautiful glassmorphism design with sakura pink accents.
+
+### Two View Modes
+
+1. **Grid View** (Default): All enabled bubbles displayed in a bento grid layout
+2. **Expanded View**: Single bubble in full-screen with sidebar navigation
+   - Click the expand button (⛶) in any bubble header to enter expanded view
+   - A sidebar appears on the left with icons for all enabled bubbles
+   - Click the minimize button (⊟) or press Escape to return to grid view
+   - Click any sidebar icon to switch between bubbles in expanded view
+
+### Interactive Tooltips
+
+Each bubble has an info icon (?) next to its title. Hover over this icon to see a helpful tooltip explaining what the bubble does and how to use it.
 
 ### Theme Toggle
 
@@ -424,7 +437,12 @@ Click the **Settings** icon in the dashboard header.
 
 ### Enable/Disable Bubbles
 
-Toggle individual bubbles on or off based on your needs. Disabled bubbles are hidden from the dashboard.
+Toggle individual bubbles on or off based on your needs. Disabled bubbles are:
+- Hidden from the dashboard grid view
+- Hidden from the sidebar navigation in expanded view
+- Excluded from keyboard navigation
+
+This allows you to customize POP to show only the utilities you actively use.
 
 ### Weekly Review Schedule
 
@@ -476,9 +494,12 @@ Each bubble has specific columns. Export first to see the expected format before
 3. Set your core question for the first deep work session
 
 ### During Work
-1. Use Cognitive Offload whenever thoughts interrupt
-2. Check Flow Thermometer when prompted
-3. Log time honestly in Truth Logger
+1. Use Cognitive Offload whenever thoughts interrupt (Alt+C)
+2. Expand bubbles to full-screen when you need focused work
+3. Use sidebar navigation to quickly switch between bubbles
+4. Check Flow Thermometer when prompted
+5. Log time honestly in Truth Logger
+6. Hover over info icons (?) if you need a reminder of what a bubble does
 
 ### Evening Review
 1. Mark completed tasks in Daily Negotiator
@@ -500,8 +521,10 @@ Each bubble has specific columns. Export first to see the expected format before
 ## Troubleshooting
 
 ### Hotkeys Not Working
-- Check `chrome://extensions/shortcuts` to verify hotkey assignments
-- Some hotkeys may conflict with other extensions
+- Due to Chrome extension limitations, POP now has a streamlined set of keyboard shortcuts
+- The primary shortcuts are Alt+C (Quick Capture) and Alt+P (Open Dashboard)
+- Use the expand/minimize feature and sidebar navigation for quick access to all bubbles
+- Press Escape to exit expanded view and return to grid
 
 ### Data Not Saving
 - Ensure the extension has storage permissions
@@ -518,22 +541,23 @@ Report issues at the project repository or consult the README.
 
 ## Quick Reference Card
 
-| Bubble | Hotkey | Primary Action |
-|--------|--------|----------------|
-| Cognitive Offload | Alt+C | Capture thought |
-| Cash Flow | Alt+M | Add transaction |
-| Net Worth | Alt+N | Update values |
-| Stock Watchlist | Alt+S | View stocks |
-| Purpose Gatekeeper | Alt+G | Add purposeful task |
-| Daily Negotiator | Alt+D | Plan your day |
-| Question Primer | Alt+Q | Set core question |
-| Flow Thermometer | Alt+F | Check flow state |
-| Truth Logger | Alt+T | Log time |
-| Tab Snoozer | Alt+B | Manage tabs |
-| Mastery Graph | Alt+Y | Log metric |
-| Digital Cleaner | Alt+K | Clean bookmarks |
-| Weekly Review | Alt+W | Start review |
-| Life Calculator | Alt+L | View life metrics |
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Alt+C | Quick Capture (Cognitive Offload overlay) |
+| Alt+P | Open Dashboard |
+| Escape | Exit expanded view / Return to grid |
+
+### Navigation Shortcuts
+
+| Action | How To |
+|--------|--------|
+| Expand a bubble | Click ⛶ button in bubble header |
+| Minimize/Return to grid | Click ⊟ button or press Escape |
+| Switch bubbles in expanded view | Click icons in left sidebar |
+| View bubble description | Hover over ? icon in bubble title |
+| Enable/disable bubbles | Settings → Toggle switches |
 
 ---
 

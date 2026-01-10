@@ -15,10 +15,12 @@
 POP is a comprehensive personal organization platform that combines multiple productivity utilities into one beautiful, cohesive extension. Each utility is called a "Bubble" and can be enabled or disabled based on your needs.
 
 ### Design Philosophy
-- **Glassmorphism UI**: Modern, frosted-glass aesthetic with smooth animations
+- **Glassmorphism UI**: Modern, frosted-glass aesthetic with smooth animations and sakura pink accents
 - **Bento Grid Layout**: Organized dashboard with flexible card arrangement
+- **Expand/Minimize Views**: Each bubble can expand to full-screen for detailed work or minimize to grid view
 - **Dark/Light Mode**: User-toggleable theme that respects your preference
-- **Keyboard-First**: Every bubble has a dedicated hotkey for quick access
+- **Interactive Tooltips**: Hover over info icons to learn what each bubble does
+- **Keyboard-First**: Quick access via keyboard shortcuts for major functions
 - **Privacy-Focused**: All data stored locally using Chrome's storage API
 
 ---
@@ -117,14 +119,9 @@ Calculate remaining weeks and hours based on your age. Tracks your "Freedom Aim"
 |----------|--------|
 | `Alt+C` | Quick Capture (Cognitive Offload) |
 | `Alt+P` | Open Dashboard |
-| `Alt+D` | Daily Planner |
-| `Alt+M` | Cash Flow |
-| `Alt+N` | Net Worth |
-| `Alt+S` | Stock Watchlist |
-| `Alt+Q` | Question Primer |
-| `Alt+F` | Flow Check |
-| `Alt+T` | Time Logger |
-| `Alt+W` | Weekly Review |
+| `Escape` | Minimize expanded bubble (return to grid view) |
+
+**Note**: Some keyboard shortcuts have been streamlined due to Chrome extension limitations (maximum 4 shortcuts). You can access all bubbles via the dashboard and expand/minimize functionality.
 
 ---
 
@@ -147,7 +144,13 @@ All data is stored locally in your Chrome profile using `chrome.storage.local`. 
 ## Configuration
 
 ### Enable/Disable Bubbles
-Click the Settings icon to toggle individual bubbles on or off.
+Click the Settings icon to toggle individual bubbles on or off. Disabled bubbles are hidden from the dashboard and sidebar navigation.
+
+### Expand/Minimize Bubbles
+Each bubble has an expand button (⛶) in its header. Click to expand a bubble to full-screen view for detailed work. A sidebar navigation appears on the left showing all enabled bubbles. Press Escape or click the minimize button (⊟) to return to grid view.
+
+### Interactive Tooltips
+Each bubble has an info icon (?) that displays helpful tooltips on hover, explaining what the bubble does and how to use it.
 
 ### Weekly Review Schedule
 Configure which day and time the Weekly Review prompt appears.
@@ -170,7 +173,7 @@ Set how often the Flow Thermometer prompts you (default: 30 minutes).
 pop-chrome-extension/
 ├── manifest.json
 ├── css/
-│   ├── styles.css        # Main Glassmorphism theme
+│   ├── styles.css        # Main Glassmorphism theme with sakura pink accents
 │   └── content.css       # Injected overlay styles
 ├── js/
 │   ├── background.js     # Service worker
@@ -179,6 +182,7 @@ pop-chrome-extension/
 │   ├── storage.js        # Data persistence
 │   ├── theme.js          # Theme management
 │   ├── sampleData.js     # Initial demo data
+│   ├── expand-manager.js # Expand/minimize functionality
 │   └── utils/            # Individual bubble modules
 ├── html/
 │   ├── main.html         # Full dashboard
