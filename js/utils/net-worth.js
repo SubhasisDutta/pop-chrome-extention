@@ -61,49 +61,51 @@ const NetWorth = {
     }
 
     container.innerHTML = `
-      <div style="text-align: center; margin-bottom: 16px;">
-        <div style="font-size: 12px; color: var(--text-muted);">Current Net Worth</div>
-        <div style="font-size: 32px; font-weight: 700; color: ${(latestEntry?.netWorth || 0) >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">
-          $${(latestEntry?.netWorth || 0).toLocaleString()}
+      <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+        <div style="text-align: center; margin-bottom: 12px; flex-shrink: 0;">
+          <div style="font-size: 12px; color: var(--text-muted);">Current Net Worth</div>
+          <div style="font-size: 28px; font-weight: 700; color: ${(latestEntry?.netWorth || 0) >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">
+            $${(latestEntry?.netWorth || 0).toLocaleString()}
+          </div>
+          ${previousEntry ? `
+            <div style="font-size: 13px; color: ${change >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">
+              ${change >= 0 ? '↑' : '↓'} $${Math.abs(change).toLocaleString()} (${changePercent}%)
+            </div>
+          ` : ''}
         </div>
-        ${previousEntry ? `
-          <div style="font-size: 14px; color: ${change >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">
-            ${change >= 0 ? '↑' : '↓'} $${Math.abs(change).toLocaleString()} (${changePercent}%)
+        ${latestEntry ? `
+          <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; gap: 8px; flex-shrink: 0;">
+            <div class="stat-item" style="padding: 10px;">
+              <div class="stat-value" style="font-size: 15px; color: var(--accent-success);">$${latestEntry.totalAssets.toLocaleString()}</div>
+              <div class="stat-label" style="font-size: 11px;">Assets</div>
+            </div>
+            <div class="stat-item" style="padding: 10px;">
+              <div class="stat-value" style="font-size: 15px; color: var(--accent-danger);">$${latestEntry.totalLiabilities.toLocaleString()}</div>
+              <div class="stat-label" style="font-size: 11px;">Liabilities</div>
+            </div>
+          </div>
+        ` : ''}
+        <button class="btn btn-primary btn-sm" id="nw-add-btn" style="width: 100%; flex-shrink: 0; margin-bottom: 12px;">
+          + Update Net Worth
+        </button>
+        ${data.entries.length > 1 ? `
+          <div style="flex-shrink: 0;">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">History (Last 6 months)</div>
+            <div style="display: flex; align-items: flex-end; gap: 4px; height: 50px;">
+              ${data.entries.slice(0, 6).reverse().map((entry, i, arr) => {
+                const max = Math.max(...arr.map(e => Math.abs(e.netWorth)));
+                const height = max > 0 ? (Math.abs(entry.netWorth) / max * 100) : 0;
+                const isPositive = entry.netWorth >= 0;
+                return `
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 100%; height: ${height}%; min-height: 4px; background: ${isPositive ? 'var(--accent-success)' : 'var(--accent-danger)'}; border-radius: 4px 4px 0 0; opacity: ${0.4 + (i / arr.length * 0.6)};" title="$${entry.netWorth.toLocaleString()}"></div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
           </div>
         ` : ''}
       </div>
-      ${latestEntry ? `
-        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 16px;">
-          <div class="stat-item" style="padding: 12px;">
-            <div class="stat-value" style="font-size: 16px; color: var(--accent-success);">$${latestEntry.totalAssets.toLocaleString()}</div>
-            <div class="stat-label">Assets</div>
-          </div>
-          <div class="stat-item" style="padding: 12px;">
-            <div class="stat-value" style="font-size: 16px; color: var(--accent-danger);">$${latestEntry.totalLiabilities.toLocaleString()}</div>
-            <div class="stat-label">Liabilities</div>
-          </div>
-        </div>
-      ` : ''}
-      <button class="btn btn-primary btn-sm" id="nw-add-btn" style="width: 100%;">
-        + Update Net Worth
-      </button>
-      ${data.entries.length > 1 ? `
-        <div style="margin-top: 16px;">
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">History (Last 6 months)</div>
-          <div style="display: flex; align-items: flex-end; gap: 4px; height: 60px;">
-            ${data.entries.slice(0, 6).reverse().map((entry, i, arr) => {
-              const max = Math.max(...arr.map(e => Math.abs(e.netWorth)));
-              const height = max > 0 ? (Math.abs(entry.netWorth) / max * 100) : 0;
-              const isPositive = entry.netWorth >= 0;
-              return `
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                  <div style="width: 100%; height: ${height}%; min-height: 4px; background: ${isPositive ? 'var(--accent-success)' : 'var(--accent-danger)'}; border-radius: 4px 4px 0 0; opacity: ${0.4 + (i / arr.length * 0.6)};" title="$${entry.netWorth.toLocaleString()}"></div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      ` : ''}
     `;
   },
 

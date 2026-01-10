@@ -106,55 +106,57 @@ const FlowThermometer = {
     const isPaused = data.paused && data.pausedUntil && new Date(data.pausedUntil) > new Date();
 
     container.innerHTML = `
-      ${isPaused ? `
-        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 10px; margin-bottom: 12px; text-align: center;">
-          <p style="font-size: 12px; color: var(--accent-info); margin: 0 0 8px;">
-            ⏸️ Paused until ${new Date(data.pausedUntil).toLocaleTimeString()}
-          </p>
-          <button class="btn btn-sm btn-secondary" id="ft-resume">Resume</button>
-        </div>
-      ` : ''}
-      ${lastReading ? `
-        <div style="text-align: center; padding: 16px; background: ${
-          lastReading.state === 'flow' ? 'rgba(16, 185, 129, 0.15)' :
-          lastReading.state === 'anxiety' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)'
-        }; border-radius: 12px; margin-bottom: 16px;">
-          <div style="font-size: 32px; margin-bottom: 8px;">
-            ${lastReading.state === 'flow' ? '🎯' : lastReading.state === 'anxiety' ? '😰' : '😴'}
+      <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+        ${isPaused ? `
+          <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 8px; margin-bottom: 10px; text-align: center; flex-shrink: 0;">
+            <p style="font-size: 11px; color: var(--accent-info); margin: 0 0 6px;">
+              ⏸️ Paused until ${new Date(data.pausedUntil).toLocaleTimeString()}
+            </p>
+            <button class="btn btn-sm btn-secondary" id="ft-resume" style="padding: 6px 12px;">Resume</button>
           </div>
-          <div style="font-size: 16px; font-weight: 600; color: ${
-            lastReading.state === 'flow' ? 'var(--accent-success)' :
-            lastReading.state === 'anxiety' ? 'var(--accent-danger)' : 'var(--accent-warning)'
-          }; text-transform: capitalize;">
-            ${lastReading.state === 'flow' ? 'In Flow!' : lastReading.state}
+        ` : ''}
+        ${lastReading ? `
+          <div style="text-align: center; padding: 12px; background: ${
+            lastReading.state === 'flow' ? 'rgba(16, 185, 129, 0.15)' :
+            lastReading.state === 'anxiety' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)'
+          }; border-radius: 10px; margin-bottom: 12px; flex-shrink: 0;">
+            <div style="font-size: 28px; margin-bottom: 6px;">
+              ${lastReading.state === 'flow' ? '🎯' : lastReading.state === 'anxiety' ? '😰' : '😴'}
+            </div>
+            <div style="font-size: 14px; font-weight: 600; color: ${
+              lastReading.state === 'flow' ? 'var(--accent-success)' :
+              lastReading.state === 'anxiety' ? 'var(--accent-danger)' : 'var(--accent-warning)'
+            }; text-transform: capitalize;">
+              ${lastReading.state === 'flow' ? 'In Flow!' : lastReading.state}
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">
+              ${data.suggestions[lastReading.state]}
+            </div>
           </div>
-          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
-            ${data.suggestions[lastReading.state]}
+        ` : `
+          <div style="text-align: center; padding: 16px; flex-shrink: 0;">
+            <div style="font-size: 28px; margin-bottom: 6px;">🌡️</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Check in to track flow state</div>
           </div>
+        `}
+        <button class="btn btn-primary btn-sm" id="ft-checkin" style="width: 100%; margin-bottom: 10px; flex-shrink: 0; padding: 8px;">
+          🌡️ Check Flow State
+        </button>
+        <div style="display: flex; gap: 6px; margin-bottom: 10px; flex-shrink: 0;">
+          <button class="btn btn-secondary btn-sm" id="ft-pause-30" style="flex: 1; padding: 6px;">Pause 30m</button>
+          <button class="btn btn-secondary btn-sm" id="ft-pause-60" style="flex: 1; padding: 6px;">Pause 1h</button>
         </div>
-      ` : `
-        <div style="text-align: center; padding: 20px;">
-          <div style="font-size: 32px; margin-bottom: 8px;">🌡️</div>
-          <div style="font-size: 13px; color: var(--text-muted);">Check in to track your flow state</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; flex-shrink: 0;">Today's Stats (${stats.total} check-ins)</div>
+        <div style="display: flex; gap: 4px; height: 6px; border-radius: 3px; overflow: hidden; flex-shrink: 0;">
+          <div style="width: ${stats.flow}%; background: var(--accent-success);" title="Flow: ${stats.flow}%"></div>
+          <div style="width: ${stats.anxiety}%; background: var(--accent-danger);" title="Anxiety: ${stats.anxiety}%"></div>
+          <div style="width: ${stats.boredom}%; background: var(--accent-warning);" title="Boredom: ${stats.boredom}%"></div>
         </div>
-      `}
-      <button class="btn btn-primary btn-sm" id="ft-checkin" style="width: 100%; margin-bottom: 12px;">
-        🌡️ Check Flow State
-      </button>
-      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-        <button class="btn btn-secondary btn-sm" id="ft-pause-30" style="flex: 1;">Pause 30m</button>
-        <button class="btn btn-secondary btn-sm" id="ft-pause-60" style="flex: 1;">Pause 1h</button>
-      </div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Today's Stats (${stats.total} check-ins)</div>
-      <div style="display: flex; gap: 4px; height: 8px; border-radius: 4px; overflow: hidden;">
-        <div style="width: ${stats.flow}%; background: var(--accent-success);" title="Flow: ${stats.flow}%"></div>
-        <div style="width: ${stats.anxiety}%; background: var(--accent-danger);" title="Anxiety: ${stats.anxiety}%"></div>
-        <div style="width: ${stats.boredom}%; background: var(--accent-warning);" title="Boredom: ${stats.boredom}%"></div>
-      </div>
-      <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
-        <span>🎯 ${stats.flow}%</span>
-        <span>😰 ${stats.anxiety}%</span>
-        <span>😴 ${stats.boredom}%</span>
+        <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted); margin-top: 4px; flex-shrink: 0;">
+          <span>🎯 ${stats.flow}%</span>
+          <span>😰 ${stats.anxiety}%</span>
+          <span>😴 ${stats.boredom}%</span>
+        </div>
       </div>
     `;
   },

@@ -78,45 +78,47 @@ const PurposeGatekeeper = {
     const autonomyPercent = total > 0 ? Math.round((autonomousTasks / total) * 100) : 0;
 
     container.innerHTML = `
-      <div style="margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 12px; color: var(--text-muted);">Autonomy Score</span>
-          <span style="font-size: 14px; font-weight: 600; color: ${autonomyPercent >= 50 ? 'var(--accent-success)' : 'var(--accent-warning)'};">${autonomyPercent}%</span>
+      <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+        <div style="margin-bottom: 12px; flex-shrink: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 11px; color: var(--text-muted);">Autonomy Score</span>
+            <span style="font-size: 13px; font-weight: 600; color: ${autonomyPercent >= 50 ? 'var(--accent-success)' : 'var(--accent-warning)'};">${autonomyPercent}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill ${autonomyPercent >= 50 ? 'success' : 'warning'}" style="width: ${autonomyPercent}%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+            <span>🎯 Choose: ${autonomousTasks}</span>
+            <span>⚡ Have to: ${controlledTasks}</span>
+          </div>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill ${autonomyPercent >= 50 ? 'success' : 'warning'}" style="width: ${autonomyPercent}%;"></div>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-          <span>🎯 Choose: ${autonomousTasks}</span>
-          <span>⚡ Have to: ${controlledTasks}</span>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-sm" id="pg-add-task" style="width: 100%; margin-bottom: 12px;">+ Add Task with Purpose</button>
-      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Active Tasks</div>
-      <ul class="item-list" style="max-height: 180px;">
-        ${activeTasks.slice(0, 5).length === 0 ? `
-          <li style="justify-content: center; color: var(--text-muted);">No tasks yet. Add one with a purpose!</li>
-        ` : activeTasks.slice(0, 5).map(task => {
-          const purpose = data.purposes.find(p => p.id === task.purposeId);
-          return `
-            <li data-id="${task.id}">
-              <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-                <input type="checkbox" class="pg-checkbox" ${task.completed ? 'checked' : ''}>
-                <div style="width: 8px; height: 8px; border-radius: 50%; background: ${purpose?.color || 'var(--text-muted)'}; flex-shrink: 0;"></div>
-                <div style="flex: 1; min-width: 0;">
-                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px;">
-                    ${this.escapeHtml(task.text)}
-                  </div>
-                  <div style="font-size: 10px; color: var(--text-muted);">
-                    ${purpose?.name || 'No purpose'} • ${task.autonomy === 'choose' ? '🎯 Choose' : '⚡ Have to'}
+        <button class="btn btn-primary btn-sm" id="pg-add-task" style="width: 100%; margin-bottom: 10px; flex-shrink: 0; padding: 8px;">+ Add Task with Purpose</button>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; flex-shrink: 0;">Active Tasks</div>
+        <ul class="item-list" style="flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; max-height: none;">
+          ${activeTasks.slice(0, 5).length === 0 ? `
+            <li style="justify-content: center; color: var(--text-muted); font-size: 12px;">No tasks yet. Add one!</li>
+          ` : activeTasks.slice(0, 5).map(task => {
+            const purpose = data.purposes.find(p => p.id === task.purposeId);
+            return `
+              <li data-id="${task.id}" style="padding: 10px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0;">
+                  <input type="checkbox" class="pg-checkbox" ${task.completed ? 'checked' : ''}>
+                  <div style="width: 6px; height: 6px; border-radius: 50%; background: ${purpose?.color || 'var(--text-muted)'}; flex-shrink: 0;"></div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px;">
+                      ${this.escapeHtml(task.text)}
+                    </div>
+                    <div style="font-size: 9px; color: var(--text-muted);">
+                      ${purpose?.name || 'No purpose'} • ${task.autonomy === 'choose' ? '🎯 Choose' : '⚡ Have to'}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <button class="btn btn-icon btn-sm pg-delete" style="opacity: 0.5; width: 24px; height: 24px;">×</button>
-            </li>
-          `;
-        }).join('')}
-      </ul>
+                <button class="btn btn-icon btn-sm pg-delete" style="opacity: 0.5; width: 20px; height: 20px; font-size: 14px;">×</button>
+              </li>
+            `;
+          }).join('')}
+        </ul>
+      </div>
     `;
   },
 

@@ -106,43 +106,45 @@ const WeeklyReview = {
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     container.innerHTML = `
-      <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-        <div style="flex: 1; text-align: center; padding: 16px; background: var(--glass-bg); border-radius: 12px;">
-          <div style="font-size: 12px; color: var(--text-muted);">Reviews Completed</div>
-          <div style="font-size: 32px; font-weight: 700; color: var(--accent-primary);">${data.reviews.length}</div>
+      <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+        <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-shrink: 0;">
+          <div style="flex: 1; text-align: center; padding: 12px; background: var(--glass-bg); border-radius: 10px;">
+            <div style="font-size: 11px; color: var(--text-muted);">Reviews</div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);">${data.reviews.length}</div>
+          </div>
+          <div style="flex: 1; text-align: center; padding: 12px; background: var(--glass-bg); border-radius: 10px;">
+            <div style="font-size: 11px; color: var(--text-muted);">Next Review</div>
+            <div style="font-size: 14px; font-weight: 600;">${dayNames[data.schedule.day]}</div>
+            <div style="font-size: 10px; color: var(--text-muted);">${this.formatTimeUntil(nextReview)}</div>
+          </div>
         </div>
-        <div style="flex: 1; text-align: center; padding: 16px; background: var(--glass-bg); border-radius: 12px;">
-          <div style="font-size: 12px; color: var(--text-muted);">Next Review</div>
-          <div style="font-size: 18px; font-weight: 600;">${dayNames[data.schedule.day]}</div>
-          <div style="font-size: 12px; color: var(--text-muted);">${this.formatTimeUntil(nextReview)}</div>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-sm" id="wr-start-review" style="width: 100%; margin-bottom: 12px;">
-        📋 Start Weekly Review
-      </button>
-      ${lastReview ? `
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-          Last Review: ${new Date(lastReview.date).toLocaleDateString()}
-        </div>
-        <div class="glass-card-flat" style="padding: 12px; max-height: 150px; overflow-y: auto;">
-          ${Object.entries(lastReview.responses).slice(0, 2).map(([q, a]) => `
-            <div style="margin-bottom: 8px;">
-              <div style="font-size: 11px; color: var(--text-muted);">${q}</div>
-              <div style="font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                ${this.escapeHtml(a)}
+        <button class="btn btn-primary btn-sm" id="wr-start-review" style="width: 100%; margin-bottom: 10px; flex-shrink: 0; padding: 8px;">
+          📋 Start Weekly Review
+        </button>
+        ${lastReview ? `
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px; flex-shrink: 0;">
+            Last Review: ${new Date(lastReview.date).toLocaleDateString()}
+          </div>
+          <div class="glass-card-flat" style="padding: 10px; flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;">
+            ${Object.entries(lastReview.responses).slice(0, 2).map(([q, a]) => `
+              <div style="margin-bottom: 8px;">
+                <div style="font-size: 10px; color: var(--text-muted);">${q}</div>
+                <div style="font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  ${this.escapeHtml(a)}
+                </div>
               </div>
-            </div>
-          `).join('')}
-          <button class="btn btn-sm btn-secondary" id="wr-view-last" style="width: 100%; margin-top: 8px;">View Full Review</button>
+            `).join('')}
+            <button class="btn btn-sm btn-secondary" id="wr-view-last" style="width: 100%; margin-top: 6px; padding: 6px; font-size: 11px;">View Full Review</button>
+          </div>
+        ` : `
+          <div style="text-align: center; padding: 16px; color: var(--text-muted); flex: 1;">
+            <div style="font-size: 28px; margin-bottom: 6px;">📋</div>
+            <div style="font-size: 12px;">No reviews yet. Start your first one!</div>
+          </div>
+        `}
+        <div style="margin-top: 10px; flex-shrink: 0;">
+          <button class="btn btn-secondary btn-sm" id="wr-settings" style="width: 100%; padding: 6px; font-size: 11px;">⚙️ Review Settings</button>
         </div>
-      ` : `
-        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-          <div style="font-size: 32px; margin-bottom: 8px;">📋</div>
-          <div style="font-size: 13px;">No reviews yet. Start your first one!</div>
-        </div>
-      `}
-      <div style="margin-top: 12px;">
-        <button class="btn btn-secondary btn-sm" id="wr-settings" style="width: 100%;">⚙️ Review Settings</button>
       </div>
     `;
   },

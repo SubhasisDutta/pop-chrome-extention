@@ -91,46 +91,48 @@ const StockWatchlist = {
     const data = await this.getData();
 
     container.innerHTML = `
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button class="btn btn-primary btn-sm" id="sw-add-watchlist">+ New Watchlist</button>
-        <button class="btn btn-secondary btn-sm" id="sw-add-stock">+ Add Stock</button>
+      <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+        <div style="display: flex; gap: 6px; margin-bottom: 12px; flex-shrink: 0;">
+          <button class="btn btn-primary btn-sm" id="sw-add-watchlist" style="flex: 1; padding: 8px;">+ Watchlist</button>
+          <button class="btn btn-secondary btn-sm" id="sw-add-stock" style="flex: 1; padding: 8px;">+ Stock</button>
+        </div>
+        ${data.watchlists.length === 0 ? `
+          <div class="empty-state" style="padding: 20px;">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-text" style="font-size: 12px;">Create a watchlist to track stocks</div>
+          </div>
+        ` : `
+          <div class="nav-tabs" style="margin-bottom: 10px; flex-shrink: 0;">
+            ${data.watchlists.map((w, i) => `
+              <button class="nav-tab ${i === 0 ? 'active' : ''}" data-watchlist="${w.id}" style="padding: 8px 14px; font-size: 12px;">${this.escapeHtml(w.name)} (${w.stocks.length})</button>
+            `).join('')}
+          </div>
+          <div id="sw-stocks-container" style="flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;">
+            ${this.renderStocksList(data.watchlists[0])}
+          </div>
+        `}
       </div>
-      ${data.watchlists.length === 0 ? `
-        <div class="empty-state" style="padding: 20px;">
-          <div class="empty-state-icon">📊</div>
-          <div class="empty-state-text">Create a watchlist to track your favorite stocks</div>
-        </div>
-      ` : `
-        <div class="nav-tabs" style="margin-bottom: 12px;">
-          ${data.watchlists.map((w, i) => `
-            <button class="nav-tab ${i === 0 ? 'active' : ''}" data-watchlist="${w.id}">${this.escapeHtml(w.name)} (${w.stocks.length})</button>
-          `).join('')}
-        </div>
-        <div id="sw-stocks-container">
-          ${this.renderStocksList(data.watchlists[0])}
-        </div>
-      `}
     `;
   },
 
   renderStocksList(watchlist) {
     if (!watchlist || watchlist.stocks.length === 0) {
-      return '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No stocks in this watchlist</div>';
+      return '<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;">No stocks in this watchlist</div>';
     }
 
     return `
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px;">
         ${watchlist.stocks.map(stock => `
-          <div class="glass-card-flat" style="padding: 12px; position: relative;" data-symbol="${stock.symbol}">
-            <button class="btn btn-icon btn-sm sw-remove-stock" style="position: absolute; top: 4px; right: 4px; opacity: 0.5; width: 24px; height: 24px; font-size: 12px;" data-watchlist="${watchlist.id}" data-symbol="${stock.symbol}">×</button>
-            <div style="font-weight: 700; font-size: 16px; color: var(--accent-primary);">${stock.symbol}</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <div class="glass-card-flat" style="padding: 10px; position: relative;" data-symbol="${stock.symbol}">
+            <button class="btn btn-icon btn-sm sw-remove-stock" style="position: absolute; top: 2px; right: 2px; opacity: 0.5; width: 20px; height: 20px; font-size: 11px; padding: 0;" data-watchlist="${watchlist.id}" data-symbol="${stock.symbol}">×</button>
+            <div style="font-weight: 700; font-size: 14px; color: var(--accent-primary); margin-bottom: 2px;">${stock.symbol}</div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
               ${this.escapeHtml(stock.name || stock.symbol)}
             </div>
-            <div style="display: flex; gap: 4px;">
-              <a href="${this.getGoogleFinanceUrl(stock.symbol, stock.exchange || 'NASDAQ')}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 4px 8px; font-size: 10px;" title="Google Finance">G</a>
-              <a href="${this.getYahooFinanceUrl(stock.symbol)}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 4px 8px; font-size: 10px;" title="Yahoo Finance">Y</a>
-              <a href="${this.getRobinhoodUrl(stock.symbol)}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 4px 8px; font-size: 10px;" title="Robinhood">R</a>
+            <div style="display: flex; gap: 3px;">
+              <a href="${this.getGoogleFinanceUrl(stock.symbol, stock.exchange || 'NASDAQ')}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 3px 6px; font-size: 9px; flex: 1;" title="Google Finance">G</a>
+              <a href="${this.getYahooFinanceUrl(stock.symbol)}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 3px 6px; font-size: 9px; flex: 1;" title="Yahoo Finance">Y</a>
+              <a href="${this.getRobinhoodUrl(stock.symbol)}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 3px 6px; font-size: 9px; flex: 1;" title="Robinhood">R</a>
             </div>
           </div>
         `).join('')}
