@@ -150,10 +150,11 @@ const ExpandManager = {
     const bubble = document.getElementById(util.bubbleId);
     if (!bubble || bubble.classList.contains('bubble-hidden')) return;
 
-    // Collapse any currently expanded
-    if (this.currentExpanded) {
+    // Collapse any currently expanded and re-render it for grid view
+    if (this.currentExpanded && this.currentExpanded !== utilityId) {
+      const prevUtilityId = this.currentExpanded;
       const prevBubble = document.getElementById(
-        this.utilities.find(u => u.id === this.currentExpanded)?.bubbleId
+        this.utilities.find(u => u.id === prevUtilityId)?.bubbleId
       );
       if (prevBubble) {
         prevBubble.classList.remove('expanded');
@@ -164,6 +165,9 @@ const ExpandManager = {
           prevExpandBtn.innerHTML = '⛶';
           prevExpandBtn.title = 'Expand';
         }
+
+        // Re-render previous bubble for grid view (minimal design)
+        this.triggerGridRender(prevUtilityId);
       }
     }
 
